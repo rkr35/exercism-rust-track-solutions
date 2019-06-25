@@ -18,27 +18,23 @@ impl<T> From<T> for HeapNode<T> {
 
 pub struct SimpleLinkedList<T> {
     head: MaybeNode<T>,
+    length: usize,
 }
 
 impl<T> SimpleLinkedList<T> {
     pub fn new() -> Self {
-        Self { head: None }
-    }
-
-    // O(n) because all n elements of &self must be iterated.
-    pub fn len(&self) -> usize {
-        let mut length = 0;
-        let mut node = &self.head;
-
-        while let Some(n) = node {
-            length += 1;
-            node = &n.next;
+        Self {
+            head: None,
+            length: 0,
         }
-
-        length
     }
 
-    // O(n) because of self.len()
+    // O(1) because all n elements of &self must be iterated.
+    pub fn len(&self) -> usize {
+        self.length
+    }
+
+    // O(1) because of self.len()
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -64,6 +60,8 @@ impl<T> SimpleLinkedList<T> {
             Some(l) => l.next = new_node,
             None => self.head = new_node,
         };
+
+        self.length += 1;
     }
 
     // O(n) because all n elements of &mut self must be iterated.
@@ -73,6 +71,8 @@ impl<T> SimpleLinkedList<T> {
         }
 
         let mut current = self.head.as_mut()?;
+
+        self.length -= 1;
 
         if current.next.is_none() {
             return extract_and_clear(&mut self.head);
@@ -115,7 +115,7 @@ where
     T: Copy,
 {
     // O(s^2), where s is the length of the slice.
-    // Self.push() is O(s), and we are calling this method s times, so O(s^2). 
+    // Self.push() is O(s), and we are calling this method s times, so O(s^2).
     fn from(slice: &[T]) -> Self {
         let mut list = Self::new();
 
