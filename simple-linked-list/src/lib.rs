@@ -20,6 +20,14 @@ impl<T> SimpleLinkedList<T> {
     }
 
     pub fn len(&self) -> usize {
-        0
+        let mut length = 0;
+        let mut node = &self.head;
+
+        while let Some(n) = node {
+            length += 1;
+            node = &n.next;
+        }
+
+        length
     }
 }
