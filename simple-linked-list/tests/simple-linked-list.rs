@@ -6,15 +6,15 @@ fn test_new_list_is_empty() {
     assert_eq!(list.len(), 0, "list's length must be 0");
 }
 
-// #[test]
+#[test]
 
-// fn test_push_increments_length() {
-//     let mut list: SimpleLinkedList<u32> = SimpleLinkedList::new();
-//     list.push(1);
-//     assert_eq!(list.len(), 1, "list's length must be 1");
-//     list.push(2);
-//     assert_eq!(list.len(), 2, "list's length must be 2");
-// }
+fn test_push_increments_length() {
+    let mut list: SimpleLinkedList<u32> = SimpleLinkedList::new();
+    list.push(1);
+    assert_eq!(list.len(), 1, "list's length must be 1");
+    list.push(2);
+    assert_eq!(list.len(), 2, "list's length must be 2");
+}
 
 // #[test]
 

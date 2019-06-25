@@ -8,6 +8,15 @@ struct Node<T> {
     next: MaybeNode<T>,
 }
 
+impl<T> From<T> for HeapNode<T> {
+    fn from(data: T) -> Self {
+        Self::new(Node {
+            data,
+            next: None
+        })
+    }
+}
+
 pub struct SimpleLinkedList<T> {
     head: MaybeNode<T>
 }
@@ -29,5 +38,30 @@ impl<T> SimpleLinkedList<T> {
         }
 
         length
+    }
+
+    fn last_mut(&mut self) -> Option<&mut HeapNode<T>> {
+        if self.head.is_none() {
+            return None;
+        }     
+
+        let mut current = self.head.as_mut().unwrap();
+
+        loop {
+            if current.next.is_none() {
+                return Some(current);
+            }
+
+            current = current.next.as_mut().unwrap();
+        }
+    }
+
+    pub fn push(&mut self, data: T) {
+        let new_node = Some(HeapNode::from(data));
+
+        match self.last_mut() {
+            Some(l) => l.next = new_node,
+            None => self.head = new_node,
+        };
     }
 }
