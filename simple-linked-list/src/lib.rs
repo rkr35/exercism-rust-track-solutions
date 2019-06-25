@@ -85,4 +85,8 @@ impl<T> SimpleLinkedList<T> {
             current = current.next.as_mut().unwrap();
         }
     }
+
+    pub fn peek(&self) -> Option<&T> {
+        self.head.as_ref().map(|node| &node.data)
+    }
 }
