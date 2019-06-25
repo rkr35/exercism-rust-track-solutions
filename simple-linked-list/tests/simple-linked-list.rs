@@ -28,16 +28,16 @@ fn test_pop_decrements_length() {
     assert_eq!(list.len(), 0, "list's length must be 0");
 }
 
-// #[test]
+#[test]
 
-// fn test_pop_returns_last_added_element() {
-//     let mut list: SimpleLinkedList<u32> = SimpleLinkedList::new();
-//     list.push(1);
-//     list.push(2);
-//     assert_eq!(list.pop(), Some(2), "Element must be 2");
-//     assert_eq!(list.pop(), Some(1), "Element must be 1");
-//     assert_eq!(list.pop(), None, "No element should be contained in list");
-// }
+fn test_pop_returns_last_added_element() {
+    let mut list: SimpleLinkedList<u32> = SimpleLinkedList::new();
+    list.push(1);
+    list.push(2);
+    assert_eq!(list.pop(), Some(2), "Element must be 2");
+    assert_eq!(list.pop(), Some(1), "Element must be 1");
+    assert_eq!(list.pop(), None, "No element should be contained in list");
+}
 
 // #[test]
 
