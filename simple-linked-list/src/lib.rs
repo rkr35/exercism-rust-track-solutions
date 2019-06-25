@@ -1,5 +1,7 @@
 #![warn(clippy::pedantic)]
 
+use std::collections::VecDeque;
+
 type HeapNode<T> = Box<Node<T>>;
 type MaybeNode<T> = Option<HeapNode<T>>;
 
@@ -88,6 +90,16 @@ impl<T> SimpleLinkedList<T> {
 
     pub fn peek(&self) -> Option<&T> {
         self.head.as_ref().map(|node| &node.data)
+    }
+
+    pub fn rev(mut self) -> Self {
+        let mut reversed_list = Self::new();
+
+        while let Some(node) = self.pop() {
+            reversed_list.push(node);
+        }
+
+        reversed_list
     }
 }
 
