@@ -16,17 +16,17 @@ fn test_push_increments_length() {
     assert_eq!(list.len(), 2, "list's length must be 2");
 }
 
-// #[test]
+#[test]
 
-// fn test_pop_decrements_length() {
-//     let mut list: SimpleLinkedList<u32> = SimpleLinkedList::new();
-//     list.push(1);
-//     list.push(2);
-//     list.pop();
-//     assert_eq!(list.len(), 1, "list's length must be 1");
-//     list.pop();
-//     assert_eq!(list.len(), 0, "list's length must be 0");
-// }
+fn test_pop_decrements_length() {
+    let mut list: SimpleLinkedList<u32> = SimpleLinkedList::new();
+    list.push(1);
+    list.push(2);
+    list.pop();
+    assert_eq!(list.len(), 1, "list's length must be 1");
+    list.pop();
+    assert_eq!(list.len(), 0, "list's length must be 0");
+}
 
 // #[test]
 

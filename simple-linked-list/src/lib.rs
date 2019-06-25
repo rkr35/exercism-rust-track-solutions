@@ -10,22 +10,17 @@ struct Node<T> {
 
 impl<T> From<T> for HeapNode<T> {
     fn from(data: T) -> Self {
-        Self::new(Node {
-            data,
-            next: None
-        })
+        Self::new(Node { data, next: None })
     }
 }
 
 pub struct SimpleLinkedList<T> {
-    head: MaybeNode<T>
+    head: MaybeNode<T>,
 }
 
 impl<T> SimpleLinkedList<T> {
     pub fn new() -> Self {
-        Self {
-            head: None,
-        }
+        Self { head: None }
     }
 
     pub fn len(&self) -> usize {
@@ -63,5 +58,31 @@ impl<T> SimpleLinkedList<T> {
             Some(l) => l.next = new_node,
             None => self.head = new_node,
         };
+    }
+
+    pub fn pop(&mut self) -> Option<T> {
+        fn extract_and_clear<T>(node: &mut MaybeNode<T>) -> Option<T> {
+            node.take().map(|n| n.data)
+        }
+
+        let mut current = self.head.as_mut()?;
+
+        if current.next.is_none() {
+            return extract_and_clear(&mut self.head);
+        }
+
+        loop {
+            let is_penultimate = {
+                let next = current.next.as_ref().unwrap();
+                let next_next = &next.next;
+                next_next.is_none()
+            };
+
+            if is_penultimate {
+                return extract_and_clear(&mut current.next);
+            }
+
+            current = current.next.as_mut().unwrap();
+        }
     }
 }
