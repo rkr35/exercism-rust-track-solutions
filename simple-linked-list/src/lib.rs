@@ -40,12 +40,12 @@ impl<T> SimpleLinkedList<T> {
         length
     }
 
-    fn last_mut(&mut self) -> Option<&mut HeapNode<T>> {
-        if self.head.is_none() {
-            return None;
-        }     
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 
-        let mut current = self.head.as_mut().unwrap();
+    fn last_mut(&mut self) -> Option<&mut HeapNode<T>> {
+        let mut current = self.head.as_mut()?;
 
         loop {
             if current.next.is_none() {
