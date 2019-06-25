@@ -1,7 +1,6 @@
 #![warn(clippy::pedantic)]
-use std::rc::Rc;
 
-type HeapNode<T> = Rc<Node<T>>;
+type HeapNode<T> = Box<Node<T>>;
 type MaybeNode<T> = Option<HeapNode<T>>;
 
 struct Node<T> {
@@ -10,13 +9,13 @@ struct Node<T> {
 }
 
 pub struct SimpleLinkedList<T> {
-    first_node: MaybeNode<T>
+    head: MaybeNode<T>
 }
 
 impl<T> SimpleLinkedList<T> {
     pub fn new() -> Self {
         Self {
-            first_node: None,
+            head: None,
         }
     }
 
