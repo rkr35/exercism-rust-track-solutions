@@ -117,3 +117,15 @@ where
         list
     }
 }
+
+impl<T> Into<Vec<T>> for SimpleLinkedList<T> {
+    fn into(mut self) -> Vec<T> {
+        let mut nodes = VecDeque::new();
+
+        while let Some(node) = self.pop() {
+            nodes.push_front(node);
+        }
+
+        nodes.into()
+    }
+}

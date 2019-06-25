@@ -74,15 +74,15 @@ fn test_reverse() {
     assert_eq!(rev_list.pop(), None);
 }
 
-// #[test]
+#[test]
 
-// fn test_into_vector() {
-//     let mut v = Vec::new();
-//     let mut s = SimpleLinkedList::new();
-//     for i in 1..4 {
-//         v.push(i);
-//         s.push(i);
-//     }
-//     let s_as_vec: Vec<i32> = s.into();
-//     assert_eq!(v, s_as_vec);
-// }
+fn test_into_vector() {
+    let mut v = Vec::new();
+    let mut s = SimpleLinkedList::new();
+    for i in 1..4 {
+        v.push(i);
+        s.push(i);
+    }
+    let s_as_vec: Vec<i32> = s.into();
+    assert_eq!(v, s_as_vec);
+}
