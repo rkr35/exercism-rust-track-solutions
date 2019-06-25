@@ -25,6 +25,7 @@ impl<T> SimpleLinkedList<T> {
         Self { head: None }
     }
 
+    // O(n) because all n elements of &self must be iterated.
     pub fn len(&self) -> usize {
         let mut length = 0;
         let mut node = &self.head;
@@ -37,10 +38,12 @@ impl<T> SimpleLinkedList<T> {
         length
     }
 
+    // O(n) because of self.len()
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
+    // O(n) because all n elements of &mut self must be iterated.
     fn last_mut(&mut self) -> Option<&mut HeapNode<T>> {
         let mut current = self.head.as_mut()?;
 
@@ -53,6 +56,7 @@ impl<T> SimpleLinkedList<T> {
         }
     }
 
+    // O(n) because of self.last_mut()
     pub fn push(&mut self, data: T) {
         let new_node = Some(HeapNode::from(data));
 
@@ -62,6 +66,7 @@ impl<T> SimpleLinkedList<T> {
         };
     }
 
+    // O(n) because all n elements of &mut self must be iterated.
     pub fn pop(&mut self) -> Option<T> {
         fn extract_and_clear<T>(node: &mut MaybeNode<T>) -> Option<T> {
             node.take().map(|n| n.data)
@@ -88,10 +93,12 @@ impl<T> SimpleLinkedList<T> {
         }
     }
 
+    // O(1) since &self owns the head resource.
     pub fn peek(&self) -> Option<&T> {
         self.head.as_ref().map(|node| &node.data)
     }
 
+    // O(n^2) since self.pop() is O(n), and we are calling self.pop() n times (once per element).
     pub fn rev(mut self) -> Self {
         let mut reversed_list = Self::new();
 
@@ -107,6 +114,8 @@ impl<T> From<&[T]> for SimpleLinkedList<T>
 where
     T: Copy,
 {
+    // O(s^2), where s is the length of the slice.
+    // Self.push() is O(s), and we are calling this method s times, so O(s^2). 
     fn from(slice: &[T]) -> Self {
         let mut list = Self::new();
 
@@ -119,6 +128,7 @@ where
 }
 
 impl<T> Into<Vec<T>> for SimpleLinkedList<T> {
+    // O(n^2) for the same reason as self.rev()
     fn into(mut self) -> Vec<T> {
         let mut nodes = VecDeque::new();
 
