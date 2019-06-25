@@ -29,7 +29,7 @@ impl<T> SimpleLinkedList<T> {
         }
     }
 
-    // O(1) because all n elements of &self must be iterated.
+    // O(1) because &self maintains length.
     pub fn len(&self) -> usize {
         self.length
     }
