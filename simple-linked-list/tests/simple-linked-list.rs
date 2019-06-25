@@ -49,16 +49,16 @@ fn test_peek_returns_head_element() {
     assert_eq!(list.peek(), Some(&2), "Element must be still 2");
 }
 
-// #[test]
+#[test]
 
-// fn test_from_slice() {
-//     let array = ["1", "2", "3", "4"];
-//     let mut list = SimpleLinkedList::from(array.as_ref());
-//     assert_eq!(list.pop(), Some("4"));
-//     assert_eq!(list.pop(), Some("3"));
-//     assert_eq!(list.pop(), Some("2"));
-//     assert_eq!(list.pop(), Some("1"));
-// }
+fn test_from_slice() {
+    let array = ["1", "2", "3", "4"];
+    let mut list = SimpleLinkedList::from(array.as_ref());
+    assert_eq!(list.pop(), Some("4"));
+    assert_eq!(list.pop(), Some("3"));
+    assert_eq!(list.pop(), Some("2"));
+    assert_eq!(list.pop(), Some("1"));
+}
 
 // #[test]
 

@@ -90,3 +90,18 @@ impl<T> SimpleLinkedList<T> {
         self.head.as_ref().map(|node| &node.data)
     }
 }
+
+impl<T> From<&[T]> for SimpleLinkedList<T>
+where
+    T: Copy,
+{
+    fn from(slice: &[T]) -> Self {
+        let mut list = Self::new();
+
+        for element in slice {
+            list.push(*element);
+        }
+
+        list
+    }
+}
