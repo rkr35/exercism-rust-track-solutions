@@ -73,7 +73,7 @@ impl<T> SimpleLinkedList<T> {
 
     // O(1) since &self has direct access to self.head.
     pub fn peek(&self) -> Option<&T> {
-        self.head.as_ref().map(|node| &node.data)
+        self.iter().nth(0).map(|node| &node.data)
     }
 
     // O(n) since self.pop() is O(1), and we are calling self.pop() n times (once per element).
