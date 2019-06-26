@@ -10,9 +10,9 @@ struct Node<T> {
     next: MaybeNode<T>,
 }
 
-impl<T> From<T> for HeapNode<T> {
+impl<T> From<T> for Node<T> {
     fn from(data: T) -> Self {
-        Self::new(Node { data, next: None })
+        Self { data, next: None }
     }
 }
 
@@ -39,66 +39,31 @@ impl<T> SimpleLinkedList<T> {
         self.len() == 0
     }
 
-    // O(n) because all n elements of &mut self must be iterated.
-    fn last_mut(&mut self) -> Option<&mut HeapNode<T>> {
-        let mut current = self.head.as_mut()?;
-
-        loop {
-            if current.next.is_none() {
-                return Some(current);
-            }
-
-            current = current.next.as_mut().unwrap();
-        }
-    }
-
-    // O(n) because of self.last_mut()
+    // O(1) because &mut self has direct access to self.head and pushing
+    // just updates self.head.
     pub fn push(&mut self, data: T) {
-        let new_node = Some(HeapNode::from(data));
-
-        match self.last_mut() {
-            Some(l) => l.next = new_node,
-            None => self.head = new_node,
-        };
-
+        self.head = Some(Box::new(Node {
+            data,
+            next: self.head.take(),
+        }));
         self.length += 1;
     }
 
-    // O(n) because all n elements of &mut self must be iterated.
+    // O(1) because &mut self has direct access to self.head.
     pub fn pop(&mut self) -> Option<T> {
-        fn extract_and_clear<T>(node: &mut MaybeNode<T>) -> Option<T> {
-            node.take().map(|n| n.data)
-        }
-
-        let mut current = self.head.as_mut()?;
-
+        let popped = self.head.take()?;
+        self.head = popped.next;
         self.length -= 1;
-
-        if current.next.is_none() {
-            return extract_and_clear(&mut self.head);
-        }
-
-        loop {
-            let is_penultimate = {
-                let next = current.next.as_ref().unwrap();
-                let next_next = &next.next;
-                next_next.is_none()
-            };
-
-            if is_penultimate {
-                return extract_and_clear(&mut current.next);
-            }
-
-            current = current.next.as_mut().unwrap();
-        }
+        Some(popped.data)
     }
 
-    // O(1) since &self owns the head resource.
+    // O(1) since &self has direct access to self.head.
     pub fn peek(&self) -> Option<&T> {
         self.head.as_ref().map(|node| &node.data)
     }
 
-    // O(n^2) since self.pop() is O(n), and we are calling self.pop() n times (once per element).
+    // O(n) since self.pop() is O(1), and we are calling self.pop() n times (once per element).
+    // Also O(n) in space, since we create and allocate elements in a new list.
     pub fn rev(mut self) -> Self {
         let mut reversed_list = Self::new();
 
@@ -114,8 +79,8 @@ impl<T> From<&[T]> for SimpleLinkedList<T>
 where
     T: Copy,
 {
-    // O(s^2), where s is the length of the slice.
-    // Self.push() is O(s), and we are calling this method s times, so O(s^2).
+    // O(s), where s is the length of the slice.
+    // Self.push() is O(1), and we are calling this method s times, so O(s).
     fn from(slice: &[T]) -> Self {
         let mut list = Self::new();
 
@@ -128,7 +93,7 @@ where
 }
 
 impl<T> Into<Vec<T>> for SimpleLinkedList<T> {
-    // O(n^2) for the same reason as self.rev()
+    // O(n) for the same reason as self.rev()
     fn into(mut self) -> Vec<T> {
         let mut nodes = VecDeque::new();
 
