@@ -70,7 +70,7 @@ impl<T> IntoIterator for SimpleLinkedList<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter {
-            current_node: self.head
+            current_node: self.head,
         }
     }
 }

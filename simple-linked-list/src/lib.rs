@@ -93,15 +93,8 @@ where
 }
 
 impl<T> Into<Vec<T>> for SimpleLinkedList<T> {
-    // O(n) for the same reason as self.rev()
-    fn into(mut self) -> Vec<T> {
-        // self.into_iter().map(|node| node.data).collect()
-        let mut nodes = std::collections::VecDeque::new();
-
-        while let Some(node) = self.pop() {
-            nodes.push_front(node);
-        }
-
-        nodes.into()
+    fn into(self) -> Vec<T> {
+        let v: Vec<_> = self.into_iter().collect();
+        v.into_iter().rev().collect()
     }
 }
