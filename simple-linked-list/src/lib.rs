@@ -21,6 +21,20 @@ pub struct SimpleLinkedList<T> {
     length: usize,
 }
 
+struct Iter<'a, T> {
+    current_node: &'a MaybeNode<T>,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a HeapNode<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let node = self.current_node.as_ref().take()?;
+        self.current_node = &node.next;
+        Some(node)
+    }
+}
+
 impl<T> SimpleLinkedList<T> {
     pub fn new() -> Self {
         Self {
@@ -72,6 +86,12 @@ impl<T> SimpleLinkedList<T> {
         }
 
         reversed_list
+    }
+
+    fn iter(&self) -> Iter<T> {
+        Iter::<T> {
+            current_node: &self.head,
+        }
     }
 }
 
