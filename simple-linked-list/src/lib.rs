@@ -1,7 +1,5 @@
 #![warn(clippy::pedantic)]
 
-use std::collections::VecDeque;
-
 type HeapNode<T> = Box<Node<T>>;
 type MaybeNode<T> = Option<HeapNode<T>>;
 
@@ -21,19 +19,7 @@ pub struct SimpleLinkedList<T> {
     length: usize,
 }
 
-struct Iter<'a, T> {
-    current_node: &'a MaybeNode<T>,
-}
-
-impl<'a, T> Iterator for Iter<'a, T> {
-    type Item = &'a HeapNode<T>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let node = self.current_node.as_ref().take()?;
-        self.current_node = &node.next;
-        Some(node)
-    }
-}
+mod iterator;
 
 impl<T> SimpleLinkedList<T> {
     pub fn new() -> Self {
@@ -73,7 +59,7 @@ impl<T> SimpleLinkedList<T> {
 
     // O(1) since &self has direct access to self.head.
     pub fn peek(&self) -> Option<&T> {
-        self.iter().nth(0).map(|node| &node.data)
+        self.iter().nth(0)
     }
 
     // O(n) since self.pop() is O(1), and we are calling self.pop() n times (once per element).
@@ -86,12 +72,6 @@ impl<T> SimpleLinkedList<T> {
         }
 
         reversed_list
-    }
-
-    fn iter(&self) -> Iter<T> {
-        Iter::<T> {
-            current_node: &self.head,
-        }
     }
 }
 
@@ -115,7 +95,8 @@ where
 impl<T> Into<Vec<T>> for SimpleLinkedList<T> {
     // O(n) for the same reason as self.rev()
     fn into(mut self) -> Vec<T> {
-        let mut nodes = VecDeque::new();
+        // self.into_iter().map(|node| node.data).collect()
+        let mut nodes = std::collections::VecDeque::new();
 
         while let Some(node) = self.pop() {
             nodes.push_front(node);
