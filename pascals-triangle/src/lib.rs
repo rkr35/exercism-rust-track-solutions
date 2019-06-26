@@ -1,11 +1,18 @@
-pub struct PascalsTriangle;
+type Row = Vec<u32>;
+type Rows = Vec<Row>;
+
+pub struct PascalsTriangle {
+    rows: Rows,
+}
 
 impl PascalsTriangle {
-    pub fn new(row_count: u32) -> Self {
-        unimplemented!("create Pascal's triangle with {} rows", row_count);
+    pub fn new(number_of_rows: usize) -> Self {
+        Self {
+            rows: Vec::with_capacity(number_of_rows),
+        }
     }
 
-    pub fn rows(&self) -> Vec<Vec<u32>> {
-        unimplemented!();
+    pub fn rows(&self) -> Rows {
+        self.rows.clone()
     }
 }
