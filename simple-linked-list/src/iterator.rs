@@ -1,4 +1,4 @@
-use super::{Node, SimpleLinkedList};
+use super::{MaybeNode, Node, SimpleLinkedList};
 
 fn ref_option_box_as_option_ref<T>(option_box: &Option<Box<T>>) -> Option<&T> {
     option_box
@@ -30,6 +30,10 @@ pub struct Mutable<'a, T> {
     current_node: Option<&'a mut Node<T>>, // None
 }
 
+pub struct Value<T> {
+    current_node: MaybeNode<T>,
+}
+
 impl<'a, T> Iterator for Immutable<'a, T> {
     type Item = &'a T;
 
@@ -47,6 +51,27 @@ impl<'a, T> Iterator for Mutable<'a, T> {
         let node = self.current_node.take()?;
         self.current_node = ref_mut_option_box_as_option_ref(&mut node.next);
         Some(&mut node.data)
+    }
+}
+
+impl<T> Iterator for Value<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let node = self.current_node.take()?;
+        self.current_node = node.next;
+        Some(node.data)
+    }
+}
+
+impl<T> IntoIterator for SimpleLinkedList<T> {
+    type Item = T;
+    type IntoIter = Value<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            current_node: self.head
+        }
     }
 }
 
