@@ -1,16 +1,19 @@
 #![warn(clippy::pedantic)]
+use std::mem::replace;
 
 pub fn abbreviate(phrase: &str) -> String {
     let mut previous = ' ';
-    let mut abbreviations = vec![];
 
-    for c in phrase.chars() {
-        if "- ".contains(previous) || c.is_uppercase() && previous.is_lowercase() {
-            abbreviations.push(c.to_ascii_uppercase());
-        }
+    phrase
+        .chars()
+        .filter_map(|c| {
+            let previous = replace(&mut previous, c);
 
-        previous = c;
-    }
-
-    abbreviations.into_iter().collect()
+            if "- ".contains(previous) || c.is_uppercase() && previous.is_lowercase() {
+                Some(c.to_ascii_uppercase())
+            } else {
+                None
+            }
+        })
+        .collect()
 }
