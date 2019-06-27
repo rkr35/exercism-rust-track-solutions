@@ -16,7 +16,7 @@ pub struct PascalsTriangle {
     rows: Rows,
 }
 
-fn get_row(row: usize) -> Row {
+fn calculate_row(row: usize) -> Row {
     (0 ..= row)
         .map(|column| binomial_coefficient(row, column) as u32)
         .collect()
@@ -25,7 +25,7 @@ fn get_row(row: usize) -> Row {
 impl PascalsTriangle {
     pub fn new(number_of_rows: usize) -> Self {
         Self {
-            rows: (0 .. number_of_rows).map(get_row).collect(),
+            rows: (0 .. number_of_rows).map(calculate_row).collect(),
         }
     }
 
