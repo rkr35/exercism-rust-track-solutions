@@ -9,23 +9,12 @@ fn is_nucleotide(c: char) -> bool {
 }
 
 pub fn count(nucleotide: char, dna: &str) -> Result<usize, char> {
-    if !is_nucleotide(nucleotide) {
-        return Err(nucleotide);
-    }
+    if !is_nucleotide(nucleotide) { return Err(nucleotide); }
 
-    let mut count = 0;
-
-    for nuc in dna.chars() {
-        if !is_nucleotide(nuc) {
-            return Err(nuc);
-        }
-
-        if nuc == nucleotide {
-            count += 1;
-        }
-    }
-
-    Ok(count)
+    dna.chars().try_fold(0, |count, c| {
+        if is_nucleotide(c) { Ok( count + usize::from(c == nucleotide) ) }
+        else { Err(c) }
+    })
 }
 
 pub fn nucleotide_counts(dna: &str) -> Result<HashMap<char, usize>, char> {
