@@ -4,15 +4,11 @@ use std::iter::repeat;
 
 const NUCLEOTIDES: &str = "ACGT";
 
-fn is_nucleotide(c: char) -> bool {
-    NUCLEOTIDES.contains(c)
-}
-
 pub fn count(nucleotide: char, dna: &str) -> Result<usize, char> {
-    if !is_nucleotide(nucleotide) { return Err(nucleotide); }
+    if !NUCLEOTIDES.contains(nucleotide) { return Err(nucleotide); }
 
     dna.chars().try_fold(0, |count, c| {
-        if is_nucleotide(c) { Ok(count + usize::from(c == nucleotide)) } 
+        if NUCLEOTIDES.contains(c) { Ok(count + usize::from(c == nucleotide)) } 
         else { Err(c) }
     })
 }
