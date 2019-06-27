@@ -3,10 +3,7 @@ use std::collections::HashMap;
 use std::iter::repeat;
 
 fn is_nucleotide(c: char) -> bool {
-    match c {
-        'A' | 'C' | 'G' | 'T' => true,
-        _ => false,
-    }
+    ['A', 'C', 'G', 'T'].contains(&c)
 }
 
 pub fn count(nucleotide: char, dna: &str) -> Result<usize, char> {
