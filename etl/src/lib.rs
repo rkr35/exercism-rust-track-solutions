@@ -1,13 +1,7 @@
 use std::collections::BTreeMap;
 
 pub fn transform(h: &BTreeMap<i32, Vec<char>>) -> BTreeMap<char, i32> {
-    let mut new = BTreeMap::new();
-
-    for (&points, characters) in h.iter() {
-        for c in characters {
-            new.insert(c.to_ascii_lowercase(), points);
-        }
-    }
-
-    new
+    h.iter()
+        .flat_map(|(&points, characters)| characters.iter().map(move |c| (c.to_ascii_lowercase(), points)))
+        .collect()
 }
