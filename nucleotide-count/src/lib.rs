@@ -2,8 +2,10 @@
 use std::collections::HashMap;
 use std::iter::repeat;
 
+const NUCLEOTIDES: &str = "ACGT";
+
 fn is_nucleotide(c: char) -> bool {
-    ['A', 'C', 'G', 'T'].contains(&c)
+    NUCLEOTIDES.contains(c)
 }
 
 pub fn count(nucleotide: char, dna: &str) -> Result<usize, char> {
@@ -17,10 +19,8 @@ pub fn count(nucleotide: char, dna: &str) -> Result<usize, char> {
 
 type Counts = HashMap<char, usize>;
 pub fn nucleotide_counts(dna: &str) -> Result<Counts, char> {
-    let counts = ['A', 'C', 'G', 'T'].iter().cloned().zip(repeat(0)).collect();
-
-    dna.chars().try_fold(counts, |mut counts : Counts, c| { 
-        if is_nucleotide(c) { Ok({ *counts.get_mut(&c).unwrap() += 1; counts }) }
-        else { Err(c) }
-    })
+    let mut counts: Counts = NUCLEOTIDES.chars().zip(repeat(0)).collect();
+    dna.chars()
+        .try_for_each(|c| counts.get_mut(&c).map(|count| *count += 1).ok_or(c))
+        .map(|()| counts)
 }
