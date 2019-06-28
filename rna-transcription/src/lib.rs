@@ -1,12 +1,17 @@
+#![warn(clippy::pedantic)]
+
 #[derive(Debug, PartialEq)]
-pub struct DNA;
+pub struct DNA(String);
 
 #[derive(Debug, PartialEq)]
 pub struct RNA;
 
 impl DNA {
-    pub fn new(dna: &str) -> Result<DNA, usize> {
-        unimplemented!("Construct new DNA from '{}' string. If string contains invalid nucleotides return index of first invalid nucleotide", dna);
+    pub fn new(dna: &str) -> Result<Self, usize> {
+        dna.chars().enumerate().try_fold(String::new(), |mut dna_string, (index, current_char)| {
+            if "ACGT".contains(current_char) { dna_string.push(current_char); Ok(dna_string) }
+            else { Err(index) }
+        }).map(Self)
     }
 
     pub fn into_rna(self) -> RNA {
