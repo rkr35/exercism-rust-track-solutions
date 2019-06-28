@@ -26,7 +26,7 @@ where
         let last_index = self.0.len() - 1;
 
         (0..last_index)
-            .map(|i| (i+1..=last_index).map(|j| usize::from(self.0[i] == self.0[j])).sum::<usize>())
+            .flat_map(|i| (i+1..=last_index).map(move |j| usize::from(self.0[i] == self.0[j])))
             .sum()
     }
 
