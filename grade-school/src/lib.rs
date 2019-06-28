@@ -10,7 +10,7 @@ impl School {
     pub fn new() -> Self { Self::default() }
 
     pub fn add(&mut self, grade: Grade, student: &str) {
-        self.0.entry(grade).or_insert_with(Students::new).push(student.to_string());
+        self.0.entry(grade).or_default().push(student.to_string());
     }
 
     pub fn grades(&self) -> Vec<Grade> {
