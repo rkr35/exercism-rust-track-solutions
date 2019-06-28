@@ -1,23 +1,31 @@
-pub struct School {}
+#![warn(clippy::pedantic)]
+
+type Grade = u32;
+type Students = Vec<String>;
+
+#[derive(Default)]
+pub struct School(std::collections::HashMap<Grade, Students>);
 
 impl School {
-    pub fn new() -> School {
-        unimplemented!()
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    pub fn add(&mut self, grade: u32, student: &str) {
-        unimplemented!("Add {} to the roster for {}", student, grade)
+    pub fn add(&mut self, grade: Grade, student: &str) {
+        self.0.entry(grade).or_insert_with(Students::new).push(student.to_string());
     }
 
-    pub fn grades(&self) -> Vec<u32> {
-        unimplemented!()
+    pub fn grades(&self) -> Vec<Grade> {
+        let mut g: Vec<_> = self.0.keys().cloned().collect();
+        g.sort_unstable();
+        g
     }
 
     // If grade returned an `Option<&Vec<String>>`,
     // the internal implementation would be forced to keep a `Vec<String>` to lend out.
     // By returning an owned vector instead,
     // the internal implementation is free to use whatever it chooses.
-    pub fn grade(&self, grade: u32) -> Option<Vec<String>> {
-        unimplemented!("Return the list of students in {}", grade)
+    pub fn grade(&self, grade: Grade) -> Option<Students> {
+        self.0.get(&grade).cloned().map(|mut s| { s.sort_unstable(); s })
     }
 }
