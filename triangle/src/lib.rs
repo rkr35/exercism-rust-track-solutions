@@ -2,6 +2,7 @@
 
 use std::iter::{empty, Sum};
 use std::ops::Add;
+use std::cmp::Ordering;
 
 const NUM_SIDES: usize = 3;
 
@@ -13,13 +14,13 @@ where
 {
     pub fn build(sides: [T; NUM_SIDES]) -> Option<Self> {
         let sum: T = sides.iter().cloned().sum();
-        let &max = sides.iter().max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+        let &max = sides.iter().max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))?;
 
         if sum == empty().sum::<T>() || sum < (max + max) {
-            return None;
+            None
+        } else {
+            Some(Self(sides))
         }
-
-        Some(Self(sides))
     }
 
     fn number_sides_equal(&self) -> usize {
