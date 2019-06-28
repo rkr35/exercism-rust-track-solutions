@@ -2,23 +2,18 @@
 
 use std::iter::{empty, Sum};
 use std::ops::Add;
-use std::cmp::Ordering;
 
 pub struct Triangle<T>([T; 3]);
 
 impl<T> Triangle<T>
 where
-    T: Sum<T> + PartialOrd<T> + Add + Copy + From<<T as Add>::Output>,
+    T: Copy + Add + Sum<T> + PartialOrd<T> + PartialOrd<<T as Add>::Output> 
 {
     pub fn build(sides: [T; 3]) -> Option<Self> {
-        let max = *sides.iter().max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
         let sum: T = sides.iter().cloned().sum();
+        let &max = sides.iter().max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
 
-        if let Ordering::Less = sum.partial_cmp(&T::from(max + max)).unwrap() {
-            return None;
-        }
-
-        if sum == empty().sum() {
+        if sum == empty().sum::<T>() || sum < (max + max) {
             return None;
         }
 
