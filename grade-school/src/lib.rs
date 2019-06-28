@@ -21,10 +21,6 @@ impl School {
         g
     }
 
-    // If grade returned an `Option<&Vec<String>>`,
-    // the internal implementation would be forced to keep a `Vec<String>` to lend out.
-    // By returning an owned vector instead,
-    // the internal implementation is free to use whatever it chooses.
     pub fn grade(&self, grade: Grade) -> Option<Students> {
         self.0.get(&grade).cloned().map(|mut s| { s.sort_unstable(); s })
     }
