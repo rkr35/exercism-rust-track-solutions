@@ -7,17 +7,14 @@ type Students = Vec<String>;
 pub struct School(std::collections::HashMap<Grade, Students>);
 
 impl School {
-    pub fn new() -> Self {
-        Self::default()
-    }
+    pub fn new() -> Self { Self::default() }
 
     pub fn add(&mut self, grade: Grade, student: &str) {
         self.0.entry(grade).or_insert_with(Students::new).push(student.to_string());
     }
 
     pub fn grades(&self) -> Vec<Grade> {
-        let mut g: Vec<_> = self.0.keys().cloned().collect();
-        g.sort_unstable();
+        let mut g: Vec<_> = self.0.keys().cloned().collect(); g.sort_unstable();
         g
     }
 
