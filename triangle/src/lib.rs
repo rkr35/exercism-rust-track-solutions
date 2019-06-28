@@ -9,7 +9,7 @@ pub struct Triangle<T>([T; NUM_SIDES]);
 
 impl<T> Triangle<T>
 where
-    T: Copy + Add + Sum<T> + PartialOrd<T> + PartialOrd<<T as Add>::Output> 
+    T: Copy + Add<Output=T> + Sum<T> + PartialOrd<T> 
 {
     pub fn build(sides: [T; NUM_SIDES]) -> Option<Self> {
         let sum: T = sides.iter().cloned().sum();
