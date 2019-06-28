@@ -6,13 +6,11 @@ fn test_valid_dna_input() {
 }
 
 #[test]
-#[ignore]
 fn test_valid_rna_input() {
     assert!(dna::RNA::new("CGAU").is_ok());
 }
 
 #[test]
-#[ignore]
 fn test_invalid_dna_input() {
     // Invalid character
     assert_eq!(dna::DNA::new("X").err(), Some(0));
@@ -23,7 +21,6 @@ fn test_invalid_dna_input() {
 }
 
 #[test]
-#[ignore]
 fn test_invalid_rna_input() {
     // Invalid character
     assert!(dna::RNA::new("X").is_err());
@@ -34,7 +31,6 @@ fn test_invalid_rna_input() {
 }
 
 #[test]
-#[ignore]
 fn test_acid_equals_acid() {
     assert_eq!(dna::DNA::new("CGA").unwrap(), dna::DNA::new("CGA").unwrap());
     assert_ne!(dna::DNA::new("CGA").unwrap(), dna::DNA::new("AGC").unwrap());
@@ -43,7 +39,7 @@ fn test_acid_equals_acid() {
 }
 
 #[test]
-#[ignore]
+
 fn test_transcribes_cytosine_guanine() {
     assert_eq!(
         dna::RNA::new("G").unwrap(),
@@ -52,7 +48,7 @@ fn test_transcribes_cytosine_guanine() {
 }
 
 #[test]
-#[ignore]
+
 fn test_transcribes_guanine_cytosine() {
     assert_eq!(
         dna::RNA::new("C").unwrap(),
@@ -61,7 +57,7 @@ fn test_transcribes_guanine_cytosine() {
 }
 
 #[test]
-#[ignore]
+
 fn test_transcribes_adenine_uracil() {
     assert_eq!(
         dna::RNA::new("U").unwrap(),
@@ -70,7 +66,7 @@ fn test_transcribes_adenine_uracil() {
 }
 
 #[test]
-#[ignore]
+
 fn test_transcribes_thymine_to_adenine() {
     assert_eq!(
         dna::RNA::new("A").unwrap(),
@@ -79,7 +75,7 @@ fn test_transcribes_thymine_to_adenine() {
 }
 
 #[test]
-#[ignore]
+
 fn test_transcribes_all_dna_to_rna() {
     assert_eq!(
         dna::RNA::new("UGCACCAGAAUU").unwrap(),
