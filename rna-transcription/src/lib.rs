@@ -12,7 +12,7 @@ const RNA_NUCLEOTIDES: [char; 4] = ['C', 'G', 'A', 'U'];
 impl DNA {
     pub fn new(dna: &str) -> Result<Self, usize> {
         dna.chars().enumerate().try_fold(String::new(), |mut dna_string, (index, current_char)| {
-            if "GCTA".contains(current_char) { dna_string.push(current_char); Ok(dna_string) }
+            if DNA_NUCLEOTIDES.contains(&current_char) { dna_string.push(current_char); Ok(dna_string) }
             else { Err(index) }
         }).map(Self)
     }
@@ -26,7 +26,7 @@ impl DNA {
 impl RNA {
     pub fn new(rna: &str) -> Result<Self, usize> {
         rna.chars().enumerate().try_fold(String::new(), |mut rna_string, (index, current_char)| {
-            if "CGAU".contains(current_char) { rna_string.push(current_char); Ok(rna_string) }
+            if RNA_NUCLEOTIDES.contains(&current_char) { rna_string.push(current_char); Ok(rna_string) }
             else { Err(index) }
         }).map(Self)
     }
