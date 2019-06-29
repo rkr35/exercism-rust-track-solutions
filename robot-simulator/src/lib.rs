@@ -66,7 +66,7 @@ impl Robot {
 
     pub fn advance(self) -> Self {
         Self {
-            position: self.position + [(0,1), (1,0), (0,-1), (-1,0)][self.direction as usize],
+            position: self.position + [(0, 1), (1, 0), (0, -1), (-1, 0)][self.direction as usize],
             ..self
         }
     }
