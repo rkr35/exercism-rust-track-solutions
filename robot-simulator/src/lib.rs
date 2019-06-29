@@ -1,27 +1,30 @@
 #![warn(clippy::pedantic)]
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Direction {
-    North,
-    East,
-    South,
-    West,
+    North, // 0 -> +1
+    East, // 1 -> +1
+    South, // 2 -> -1
+    West, // 3 -> -1
+}
+
+impl Direction {
+    const fn ordinal(self) -> isize { self as isize }
+    const fn last() -> Self { Direction::West }
+    const fn num_directions() -> isize { 1 + Self::last().ordinal() }
 }
 
 impl From<isize> for Direction {
     fn from(discriminant: isize) -> Self {
         use Direction::*;
-        const fn ordinal(d: Direction) -> isize { d as isize }
-        const NUM_DIRECTIONS: isize = 1 + ordinal(West);
-        
         let my_mod = |a, b| (a % b + b) % b;
-
-        match my_mod(discriminant, NUM_DIRECTIONS) {
-            o if o == ordinal(North) => North,
-            o if o == ordinal(East) => East,
-            o if o == ordinal(South) => South,
-            o if o == ordinal(West) => West,
-            _ => panic!("unrecognized direction discriminant: {}", discriminant),
+        
+        match my_mod(discriminant, Self::num_directions()) {
+            o if o == North.ordinal() => North,
+            o if o == East.ordinal() => East,
+            o if o == South.ordinal() => South,
+            o if o == West.ordinal() => West,
+            _ => panic!("unexpected direction discriminant: {}", discriminant),
         }
     }
 }
@@ -46,7 +49,7 @@ impl Robot {
 
     fn turn(self, units: isize) -> Self {
         Self {
-            direction: Direction::from(self.direction as isize + units),
+            direction: Direction::from(self.direction.ordinal() + units),
             ..self
         }
     }
