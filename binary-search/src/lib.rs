@@ -1,19 +1,17 @@
 use std::cmp::Ordering;
-use std::mem::replace;
 
 pub fn find(array: &[i32], key: i32) -> Option<usize> {
-    let (mut low, mut high) = (0, array.len());
-    let mut middle = (low + high) / 2;
+    let (mut low, mut high) = (0, array.len().checked_sub(1)?);
 
-    loop {
+    while low <= high {
+        let middle = (low + high) / 2;
+
         match key.cmp(array.get(middle)?) {
+            Ordering::Less => high = middle.checked_sub(1)?,
+            Ordering::Greater => low = middle + 1,
             Ordering::Equal => return Some(middle),
-            Ordering::Less => high = middle,
-            Ordering::Greater => low = middle,
         };
-
-        if replace(&mut middle, (low + high) / 2) == middle {
-            return None;
-        }
     }
+
+    None
 }
