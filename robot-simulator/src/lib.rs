@@ -17,10 +17,7 @@ impl From<isize> for Direction {
     }
 }
 
-struct Position<T> {
-    x: T,
-    y: T,
-}
+struct Position<T>(T, T);
 
 impl<T> Add<(T, T)> for Position<T>
 where
@@ -29,10 +26,7 @@ where
     type Output = Self;
 
     fn add(self, rhs: (T, T)) -> Self::Output {
-        Self {
-            x: self.x + rhs.0,
-            y: self.y + rhs.1,
-        }
+        Self(self.0 + rhs.0, self.1 + rhs.1)
     }
 }
 
@@ -44,7 +38,7 @@ pub struct Robot {
 impl Robot {
     pub fn new(x: i32, y: i32, d: Direction) -> Self {
         Self {
-            position: Position { x, y },
+            position: Position(x, y),
             direction: d,
         }
     }
@@ -85,7 +79,7 @@ impl Robot {
     }
 
     pub fn position(&self) -> (i32, i32) {
-        (self.position.x, self.position.y)
+        (self.position.0, self.position.1)
     }
 
     pub fn direction(&self) -> &Direction {
