@@ -1,7 +1,11 @@
 use std::cmp::Ordering;
 
-pub fn find<Element>(array: &[Element], key: Element) -> Option<usize> 
-where Element: Ord {
+pub fn find<Element, Container>(array: Container, key: Element) -> Option<usize>
+where
+    Element: Ord,
+    Container: AsRef<[Element]>,
+{
+    let array = array.as_ref();
     let (mut low, mut high) = (0, array.len().checked_sub(1)?);
 
     while low <= high {
