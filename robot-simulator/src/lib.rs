@@ -50,17 +50,13 @@ impl Robot {
         }
     }
 
-    fn do_instruction(self, instruction: char) -> Self {
-        match instruction {
-            'L' => self.turn_left(),
-            'R' => self.turn_right(),
-            'A' => self.advance(),
-            _ => panic!("unrecognized instruction: \"{}\"", instruction),
-        }
-    }
-
     pub fn instructions(self, instructions: &str) -> Self {
-        instructions.chars().fold(self, Self::do_instruction)
+        instructions.chars().fold(self, |robot, instruction| match instruction {
+            'L' => robot.turn_left(),
+            'R' => robot.turn_right(),
+            'A' => robot.advance(),
+            _ => panic!("unrecognized instruction: \"{}\"", instruction),
+        })
     }
 
     pub fn position(&self) -> (i32, i32) {
