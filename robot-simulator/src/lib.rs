@@ -10,13 +10,17 @@ pub enum Direction {
 
 impl From<isize> for Direction {
     fn from(discriminant: isize) -> Self {
-        const NUM_DIRECTIONS: isize = 4;
+        use Direction::*;
+        const fn ordinal(d: Direction) -> isize { d as isize }
+        const NUM_DIRECTIONS: isize = 1 + ordinal(West);
+        
         let my_mod = |a, b| (a % b + b) % b;
+
         match my_mod(discriminant, NUM_DIRECTIONS) {
-            0 => Direction::North,
-            1 => Direction::East,
-            2 => Direction::South,
-            3 => Direction::West,
+            o if o == ordinal(North) => North,
+            o if o == ordinal(East) => East,
+            o if o == ordinal(South) => South,
+            o if o == ordinal(West) => West,
             _ => panic!("unrecognized direction discriminant: {}", discriminant),
         }
     }
