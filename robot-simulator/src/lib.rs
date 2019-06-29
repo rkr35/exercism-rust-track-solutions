@@ -1,5 +1,4 @@
 #![warn(clippy::pedantic)]
-use std::ops::Add;
 
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Direction {
@@ -9,28 +8,15 @@ pub enum Direction {
     West,
 }
 
-struct Position<T>(T, T);
-
-impl<T> Add<(T, T)> for Position<T>
-where
-    T: Add<Output = T>,
-{
-    type Output = Self;
-
-    fn add(self, rhs: (T, T)) -> Self::Output {
-        Self(self.0 + rhs.0, self.1 + rhs.1)
-    }
-}
-
 pub struct Robot {
-    position: Position<i32>,
+    position: (i32, i32),
     direction: Direction,
 }
 
 impl Robot {
     pub fn new(x: i32, y: i32, d: Direction) -> Self {
         Self {
-            position: Position(x, y),
+            position: (x, y),
             direction: d,
         }
     }
@@ -56,7 +42,10 @@ impl Robot {
 
     pub fn advance(self) -> Self {
         Self {
-            position: self.position + [(0, 1), (1, 0), (0, -1), (-1, 0)][self.direction as usize],
+            position: {
+                let movement = [(0, 1), (1, 0), (0, -1), (-1, 0)][self.direction as usize];
+                (self.position.0 + movement.0, self.position.1 + movement.1)
+            },
             ..self
         }
     }
@@ -75,7 +64,7 @@ impl Robot {
     }
 
     pub fn position(&self) -> (i32, i32) {
-        (self.position.0, self.position.1)
+        self.position
     }
 
     pub fn direction(&self) -> &Direction {
