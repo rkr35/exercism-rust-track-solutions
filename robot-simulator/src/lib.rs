@@ -1,5 +1,4 @@
-// The code below is a stub. Just enough to satisfy the compiler.
-// In order to pass the tests you can add-to or change any of this code.
+#![warn(clippy::pedantic)]
 
 #[derive(PartialEq, Debug)]
 pub enum Direction {
@@ -9,11 +8,22 @@ pub enum Direction {
     West,
 }
 
-pub struct Robot;
+struct Position<T> {
+    x: T,
+    y: T,
+}
+
+pub struct Robot {
+    position: Position<i32>,
+    direction: Direction,
+}
 
 impl Robot {
     pub fn new(x: i32, y: i32, d: Direction) -> Self {
-        unimplemented!("Create a robot at (x, y) ({}, {}) facing {:?}", x, y, d,)
+        Self {
+            position: Position { x, y },
+            direction: d,
+        }
     }
 
     pub fn turn_right(self) -> Self {
@@ -36,10 +46,10 @@ impl Robot {
     }
 
     pub fn position(&self) -> (i32, i32) {
-        unimplemented!()
+        (self.position.x, self.position.y)
     }
 
     pub fn direction(&self) -> &Direction {
-        unimplemented!()
+        &self.direction
     }
 }
