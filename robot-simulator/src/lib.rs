@@ -9,14 +9,6 @@ pub enum Direction {
     West,
 }
 
-impl From<isize> for Direction {
-    fn from(discriminant: isize) -> Self {
-        use Direction::*;
-        let my_mod = |a, b| (a % b + b) % b;
-        [North, East, South, West][my_mod(discriminant, 1 + West as isize) as usize]
-    }
-}
-
 struct Position<T>(T, T);
 
 impl<T> Add<(T, T)> for Position<T>
@@ -45,7 +37,11 @@ impl Robot {
 
     fn turn(self, units: isize) -> Self {
         Self {
-            direction: Direction::from(self.direction as isize + units),
+            direction: {
+                use Direction::*;
+                let m = |a, b| (a % b + b) % b;
+                [North, East, South, West][m(self.direction as isize + units, 1 + West as isize) as usize]
+            },
             ..self
         }
     }
