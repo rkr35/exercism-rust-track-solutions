@@ -1,4 +1,5 @@
 #![warn(clippy::pedantic)]
+use std::ops::Add;
 
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Direction {
@@ -24,7 +25,7 @@ impl From<isize> for Direction {
             o if o == East.ordinal() => East,
             o if o == South.ordinal() => South,
             o if o == West.ordinal() => West,
-            _ => panic!("unexpected direction discriminant: {}", discriminant),
+            _ => panic!("unexpected direction discriminant: \"{}\"", discriminant),
         }
     }
 }
@@ -32,6 +33,18 @@ impl From<isize> for Direction {
 struct Position<T> {
     x: T,
     y: T,
+}
+
+impl<T, U, V> Add<(U, V)> for Position<T> 
+    where T: Add<U, Output=T> + Add<V, Output=T> {
+    type Output = Self;
+
+    fn add(self, rhs: (U, V)) -> Self::Output {
+        Self {
+            x: self.x + rhs.0,
+            y: self.y + rhs.1
+        }
+    }
 }
 
 pub struct Robot {
@@ -63,14 +76,32 @@ impl Robot {
     }
 
     pub fn advance(self) -> Self {
-        unimplemented!()
+        use Direction::*;
+
+        let movement = match self.direction {
+            North => (0, 1),
+            East => (1, 0),
+            South => (0, -1),
+            West => (-1, 0),
+        };
+
+        Self {
+            position: self.position + movement,
+            ..self
+        }
     }
 
-    pub fn instructions(self, instructions: &str) -> Self {
-        unimplemented!(
-            "Follow the given sequence of instructions: {}",
-            instructions
-        )
+    pub fn instructions(mut self, instructions: &str) -> Self {
+        for instruction in instructions.chars() {
+            self = match instruction {
+                'L' => self.turn_left(),
+                'R' => self.turn_right(),
+                'A' => self.advance(),
+                _ => panic!("unrecognized instruction: \"{}\"", instruction)
+            }
+        }
+
+        self
     }
 
     pub fn position(&self) -> (i32, i32) {
