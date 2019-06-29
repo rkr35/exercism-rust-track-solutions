@@ -4,22 +4,28 @@ use std::ops::Add;
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Direction {
     North, // 0 -> +1
-    East, // 1 -> +1
+    East,  // 1 -> +1
     South, // 2 -> -1
-    West, // 3 -> -1
+    West,  // 3 -> -1
 }
 
 impl Direction {
-    const fn ordinal(self) -> isize { self as isize }
-    const fn last() -> Self { Direction::West }
-    const fn num_directions() -> isize { 1 + Self::last().ordinal() }
+    const fn ordinal(self) -> isize {
+        self as isize
+    }
+    const fn last() -> Self {
+        Direction::West
+    }
+    const fn num_directions() -> isize {
+        1 + Self::last().ordinal()
+    }
 }
 
 impl From<isize> for Direction {
     fn from(discriminant: isize) -> Self {
         use Direction::*;
         let my_mod = |a, b| (a % b + b) % b;
-        
+
         match my_mod(discriminant, Self::num_directions()) {
             o if o == North.ordinal() => North,
             o if o == East.ordinal() => East,
@@ -35,14 +41,16 @@ struct Position<T> {
     y: T,
 }
 
-impl<T, U, V> Add<(U, V)> for Position<T> 
-    where T: Add<U, Output=T> + Add<V, Output=T> {
+impl<T, U, V> Add<(U, V)> for Position<T>
+where
+    T: Add<U, Output = T> + Add<V, Output = T>,
+{
     type Output = Self;
 
     fn add(self, rhs: (U, V)) -> Self::Output {
         Self {
             x: self.x + rhs.0,
-            y: self.y + rhs.1
+            y: self.y + rhs.1,
         }
     }
 }
@@ -97,7 +105,7 @@ impl Robot {
                 'L' => self.turn_left(),
                 'R' => self.turn_right(),
                 'A' => self.advance(),
-                _ => panic!("unrecognized instruction: \"{}\"", instruction)
+                _ => panic!("unrecognized instruction: \"{}\"", instruction),
             }
         }
 
