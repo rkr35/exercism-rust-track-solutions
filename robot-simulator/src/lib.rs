@@ -99,17 +99,17 @@ impl Robot {
         }
     }
 
-    pub fn instructions(mut self, instructions: &str) -> Self {
-        for instruction in instructions.chars() {
-            self = match instruction {
-                'L' => self.turn_left(),
-                'R' => self.turn_right(),
-                'A' => self.advance(),
-                _ => panic!("unrecognized instruction: \"{}\"", instruction),
-            }
+    fn do_instruction(self, instruction: char) -> Self {
+        match instruction {
+            'L' => self.turn_left(),
+            'R' => self.turn_right(),
+            'A' => self.advance(),
+            _ => panic!("unrecognized instruction: \"{}\"", instruction),
         }
+    }
 
-        self
+    pub fn instructions(self, instructions: &str) -> Self {
+        instructions.chars().fold(self, Self::do_instruction)
     }
 
     pub fn position(&self) -> (i32, i32) {
