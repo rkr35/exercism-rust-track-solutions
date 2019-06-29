@@ -3,36 +3,17 @@ use std::ops::Add;
 
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Direction {
-    North, // 0 -> +1
-    East,  // 1 -> +1
-    South, // 2 -> -1
-    West,  // 3 -> -1
-}
-
-impl Direction {
-    const fn ordinal(self) -> isize {
-        self as isize
-    }
-    const fn last() -> Self {
-        Direction::West
-    }
-    const fn num_directions() -> isize {
-        1 + Self::last().ordinal()
-    }
+    North,
+    East,
+    South,
+    West,
 }
 
 impl From<isize> for Direction {
     fn from(discriminant: isize) -> Self {
         use Direction::*;
         let my_mod = |a, b| (a % b + b) % b;
-
-        match my_mod(discriminant, Self::num_directions()) {
-            o if o == North.ordinal() => North,
-            o if o == East.ordinal() => East,
-            o if o == South.ordinal() => South,
-            o if o == West.ordinal() => West,
-            _ => panic!("unexpected direction discriminant: \"{}\"", discriminant),
-        }
+        [North, East, South, West][my_mod(discriminant, 1 + West as isize) as usize]
     }
 }
 
@@ -41,13 +22,13 @@ struct Position<T> {
     y: T,
 }
 
-impl<T, U, V> Add<(U, V)> for Position<T>
+impl<T> Add<(T, T)> for Position<T>
 where
-    T: Add<U, Output = T> + Add<V, Output = T>,
+    T: Add<Output = T>,
 {
     type Output = Self;
 
-    fn add(self, rhs: (U, V)) -> Self::Output {
+    fn add(self, rhs: (T, T)) -> Self::Output {
         Self {
             x: self.x + rhs.0,
             y: self.y + rhs.1,
@@ -70,7 +51,7 @@ impl Robot {
 
     fn turn(self, units: isize) -> Self {
         Self {
-            direction: Direction::from(self.direction.ordinal() + units),
+            direction: Direction::from(self.direction as isize + units),
             ..self
         }
     }
@@ -84,17 +65,8 @@ impl Robot {
     }
 
     pub fn advance(self) -> Self {
-        use Direction::*;
-
-        let movement = match self.direction {
-            North => (0, 1),
-            East => (1, 0),
-            South => (0, -1),
-            West => (-1, 0),
-        };
-
         Self {
-            position: self.position + movement,
+            position: self.position + [(0,1), (1,0), (0,-1), (-1,0)][self.direction as usize],
             ..self
         }
     }
