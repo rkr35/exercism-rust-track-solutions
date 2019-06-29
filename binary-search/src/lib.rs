@@ -4,7 +4,7 @@ pub fn find(array: &[i32], key: i32) -> Option<usize> {
     let (mut low, mut high) = (0, array.len().checked_sub(1)?);
 
     while low <= high {
-        let middle = (low + high) / 2;
+        let middle = low + (high - low) / 2;
 
         match key.cmp(array.get(middle)?) {
             Ordering::Less => high = middle.checked_sub(1)?,
