@@ -9,6 +9,7 @@ pub struct BowlingGame {
     rolls_left: usize,
     score: u16,
     spares: Vec<u8>,
+    is_fill_bill: bool,
 }
 
 const PINS_PER_FRAME: u16 = 10;
@@ -19,7 +20,8 @@ impl Default for BowlingGame {
             pins_left: PINS_PER_FRAME,
             rolls_left: 20,
             score: 0,
-            spares: vec![],
+            spares: Default::default(),
+            is_fill_bill: false,
         }
     }
 }
@@ -38,19 +40,25 @@ impl BowlingGame {
             return Err(Error::GameComplete);
         }
 
-        if self.spares.pop().is_some() {
-            self.score += pins;
-        }
-
         self.pins_left -= pins;
         self.rolls_left -= 1;
 
         self.score += pins;
-
+        
+        if !self.is_fill_bill  && self.spares.pop().is_some() {
+            self.score += pins;
+        }
+        
         let is_frame_complete = self.rolls_left % 2 == 0;
         if is_frame_complete {
             if self.pins_left == 0 {
                 self.spares.push(0);
+
+                if self.rolls_left == 0 {
+                    // Fill bill
+                    self.rolls_left += 1;
+                    self.is_fill_bill = true;
+                }
             }
             
             self.pins_left = PINS_PER_FRAME;
