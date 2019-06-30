@@ -15,9 +15,7 @@ impl ChessPosition {
 }
 
 impl Queen {
-    pub fn new(position: ChessPosition) -> Self {
-        Self(position)
-    }
+    pub fn new(position: ChessPosition) -> Self { Self(position) }
 
     pub fn can_attack(&self, other: &Self) -> bool {
         let ChessPosition(r0, c0) = self.0;
