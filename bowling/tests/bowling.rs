@@ -95,7 +95,6 @@ fn spare_in_the_first_frame_followed_by_zeros() {
 }
 
 #[test]
-#[ignore]
 fn points_scored_in_the_roll_after_a_spare_are_counted_twice_as_a_bonus() {
     let mut game = BowlingGame::new();
 
@@ -111,7 +110,6 @@ fn points_scored_in_the_roll_after_a_spare_are_counted_twice_as_a_bonus() {
 }
 
 #[test]
-#[ignore]
 fn consecutive_spares_each_get_a_one_roll_bonus() {
     let mut game = BowlingGame::new();
 

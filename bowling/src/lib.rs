@@ -8,14 +8,18 @@ pub struct BowlingGame {
     pins_left: u16,
     rolls_left: usize,
     score: u16,
+    spares: Vec<u8>,
 }
+
+const PINS_PER_FRAME: u16 = 10;
 
 impl Default for BowlingGame {
     fn default() -> Self {
         Self {
-            pins_left: 10,
+            pins_left: PINS_PER_FRAME,
             rolls_left: 20,
             score: 0,
+            spares: vec![],
         }
     }
 }
@@ -34,9 +38,23 @@ impl BowlingGame {
             return Err(Error::GameComplete);
         }
 
+        if self.spares.pop().is_some() {
+            self.score += pins;
+        }
+
+        self.pins_left -= pins;
         self.rolls_left -= 1;
 
         self.score += pins;
+
+        let is_frame_complete = self.rolls_left % 2 == 0;
+        if is_frame_complete {
+            if self.pins_left == 0 {
+                self.spares.push(0);
+            }
+            
+            self.pins_left = PINS_PER_FRAME;
+        }
 
         Ok(())
     }
