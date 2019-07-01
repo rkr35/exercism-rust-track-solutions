@@ -206,7 +206,6 @@ fn a_strike_in_the_last_frame_earns_a_two_roll_bonus_that_is_counted_once() {
 }
 
 #[test]
-#[ignore]
 fn a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll() {
     let mut game = BowlingGame::new();
 
@@ -266,7 +265,6 @@ fn all_strikes_is_a_perfect_score_of_300() {
 }
 
 #[test]
-#[ignore]
 fn you_cannot_roll_more_than_ten_pins_in_a_single_frame() {
     let mut game = BowlingGame::new();
 
@@ -372,7 +370,6 @@ fn if_the_last_frame_is_a_strike_you_cannot_score_before_the_extra_rolls_are_tak
 }
 
 #[test]
-#[ignore]
 fn if_the_last_frame_is_a_spare_you_cannot_create_a_score_before_extra_roll_is_taken() {
     let mut game = BowlingGame::new();
 
@@ -391,7 +388,6 @@ fn if_the_last_frame_is_a_spare_you_cannot_create_a_score_before_extra_roll_is_t
 }
 
 #[test]
-#[ignore]
 fn cannot_roll_after_bonus_roll_for_spare() {
     let mut game = BowlingGame::new();
 
