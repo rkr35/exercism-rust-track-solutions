@@ -61,10 +61,11 @@ impl BowlingGame {
 
             dbg!(pins_left);
 
-            dbg!(&self.next_kind);
+            dbg!(&current_frame.kind);
 
             match current_frame.kind {
                 FillBillStrike => (),
+                
                 _ => match pins.cmp(&pins_left) {
                     Ordering::Greater => return Err(Error::NotEnoughPinsLeft),
                     Ordering::Equal => self.next_kind = Spare,
