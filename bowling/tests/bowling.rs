@@ -141,7 +141,6 @@ fn if_the_last_frame_is_a_spare_you_get_one_extra_roll_that_is_scored_once() {
 }
 
 #[test]
-#[ignore]
 fn a_strike_earns_ten_points_in_a_frame_with_a_single_roll() {
     let mut game = BowlingGame::new();
 
@@ -155,7 +154,6 @@ fn a_strike_earns_ten_points_in_a_frame_with_a_single_roll() {
 }
 
 #[test]
-#[ignore]
 fn points_scored_in_the_two_rolls_after_a_strike_are_counted_twice_as_a_bonus() {
     let mut game = BowlingGame::new();
 
@@ -189,7 +187,6 @@ fn consecutive_strikes_each_get_the_two_roll_bonus() {
 }
 
 #[test]
-#[ignore]
 fn a_strike_in_the_last_frame_earns_a_two_roll_bonus_that_is_counted_once() {
     let mut game = BowlingGame::new();
 
@@ -205,7 +202,6 @@ fn a_strike_in_the_last_frame_earns_a_two_roll_bonus_that_is_counted_once() {
 }
 
 #[test]
-#[ignore]
 fn a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll() {
     let mut game = BowlingGame::new();
 
@@ -221,7 +217,6 @@ fn a_spare_with_the_two_roll_bonus_does_not_get_a_bonus_roll() {
 }
 
 #[test]
-#[ignore]
 fn strikes_with_the_two_roll_bonus_do_not_get_a_bonus_roll() {
     let mut game = BowlingGame::new();
 

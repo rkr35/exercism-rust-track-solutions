@@ -10,6 +10,7 @@ pub enum Error {
 const NUM_FRAMES: usize = 10;
 const NUM_PINS_PER_FRAME: u16 = 10;
 
+#[derive(Debug)]
 enum FrameKind {
     Normal,
     Spare,
@@ -45,7 +46,9 @@ impl BowlingGame {
     }
 
     pub fn roll(&mut self, pins: u16) -> Result<(), Error> {
+        use FrameKind::*;
         dbg!(self.frames_left);
+        dbg!(pins);
 
         if self.frames_left == 0 {
             return Err(Error::GameComplete);
@@ -56,12 +59,19 @@ impl BowlingGame {
         if let Some(first_roll) = current_frame.first_roll {
             let pins_left = NUM_PINS_PER_FRAME - first_roll;
 
-            match pins.cmp(&pins_left) {
-                Ordering::Greater => return Err(Error::NotEnoughPinsLeft),
-                Ordering::Equal => self.next_kind = FrameKind::Spare,
-                _ => ()
-            };
+            dbg!(pins_left);
 
+            dbg!(&self.next_kind);
+
+            match current_frame.kind {
+                FillBillStrike => (),
+                _ => match pins.cmp(&pins_left) {
+                    Ordering::Greater => return Err(Error::NotEnoughPinsLeft),
+                    Ordering::Equal => self.next_kind = Spare,
+                    _ => (),
+                }
+            };
+                
             current_frame.second_roll = Some(pins);
 
             self.complete_frame();
@@ -76,14 +86,18 @@ impl BowlingGame {
                 kind: std::mem::replace(&mut self.next_kind, FrameKind::default())
             };
 
-            if let FrameKind::FillBillSpare = current_frame.kind {
+            dbg!(&current_frame.kind);
+
+            if let FillBillSpare = current_frame.kind {
                 self.complete_frame();
             } else if pins == NUM_PINS_PER_FRAME {
-                self.next_kind = FrameKind::Strike;
-                self.complete_frame();
+                if let FillBillStrike = current_frame.kind {} 
+                else {
+                    dbg!("strike");
+                    self.next_kind = Strike;
+                    self.complete_frame();
+                };
             }
-
-            // need to call complete_frame if spare fill bill.
         }
 
         Ok(())
@@ -120,6 +134,8 @@ impl BowlingGame {
         if self.frames_left == 0 {
             use FrameKind::*;
 
+            dbg!(&self.next_kind);
+
             match self.next_kind {
                 Spare => {
                     self.next_kind = FillBillSpare;
@@ -130,7 +146,7 @@ impl BowlingGame {
                     self.next_kind = FillBillStrike;
                     self.frames_left += 1;
                 }
-                
+
                 _ => ()
             };
         }
