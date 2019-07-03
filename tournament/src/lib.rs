@@ -2,7 +2,24 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
-type AllStats<'a> = HashMap<&'a str, Stats>;
+pub fn tally(match_results: &str) -> String {
+    if match_results.is_empty() { 
+        get_header() 
+    }
+    else {
+        get_header() + "\n" + &get_stat_rows(match_results).join("\n") 
+    }
+}
+
+macro_rules! row_format {
+    ($($arg:expr),+) => {
+        format!("{:31}|{:>width$} |{:>width$} |{:>width$} |{:>width$} |{:>width$}", $($arg,)+ width=3)
+    };
+}
+
+fn get_header() -> String {
+    row_format!("Team", "MP", "W", "D", "L", "P")
+}
 
 #[derive(Default)]
 struct Stats {
@@ -26,15 +43,24 @@ impl Stats {
     }
 }
 
-macro_rules! row_format {
-    ($($arg:expr),+) => {
-        format!("{:31}|{:>width$} |{:>width$} |{:>width$} |{:>width$} |{:>width$}", $($arg,)+ width=3)
-    };
+fn get_stat_rows(match_results: &str) -> Vec<String> {
+    let mut team_stats: Vec<_> = parse_team_stats(match_results).into_iter().collect();
+
+    // Sort by points and then team name.
+    team_stats.sort_unstable_by(|(name1, stats1), (name2, stats2)| {
+        match stats2.points.cmp(&stats1.points) {
+            Ordering::Equal => name1.cmp(name2),
+            points_ordering => points_ordering,
+        }
+    });
+
+    team_stats
+        .into_iter()
+        .map(|(name, stats)| row_format!(name, stats.matches, stats.won, stats.drew, stats.loss, stats.points))
+        .collect::<Vec<_>>()
 }
 
-fn get_header() -> String {
-    row_format!("Team", "MP", "W", "D", "L", "P")
-}
+type AllStats<'a> = HashMap<&'a str, Stats>;
 
 fn parse_team_stats(match_results: &str) -> AllStats {
     fn update<'a>(stats: &mut AllStats<'a>, first_team: &'a str, second_team: &'a str, conclusion: &str) {
@@ -66,30 +92,4 @@ fn parse_team_stats(match_results: &str) -> AllStats {
     }
 
     team_stats
-}
-
-fn get_stat_rows(match_results: &str) -> Vec<String> {
-    let mut team_stats: Vec<_> = parse_team_stats(match_results).into_iter().collect();
-
-    // Sort by points and then team name.
-    team_stats.sort_unstable_by(|(name1, stats1), (name2, stats2)| {
-        match stats2.points.cmp(&stats1.points) {
-            Ordering::Equal => name1.cmp(name2),
-            points_ordering => points_ordering,
-        }
-    });
-
-    team_stats
-        .into_iter()
-        .map(|(name, stats)| row_format!(name, stats.matches, stats.won, stats.drew, stats.loss, stats.points))
-        .collect::<Vec<_>>()
-}
-
-pub fn tally(match_results: &str) -> String {
-    if match_results.is_empty() { 
-        get_header() 
-    }
-    else {
-        get_header() + "\n" + &get_stat_rows(match_results).join("\n") 
-    }
 }
