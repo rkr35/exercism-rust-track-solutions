@@ -54,9 +54,7 @@ impl BowlingGame {
     }
 
     pub fn roll(&mut self, pins: u16) -> Result<(), Error> {
-        if self.frames_left == 0 {
-            return Err(Error::GameComplete);
-        }
+        if self.frames_left == 0 { return Err(Error::GameComplete); }
 
         if let Some(first_roll) = self.get_current_frame().first_roll {
             self.handle_second_roll(first_roll, pins)?;
@@ -68,11 +66,8 @@ impl BowlingGame {
     }
 
     pub fn score(&self) -> Option<u16> {
-        if self.frames_left == 0 {
-            Some((0..NUM_FRAMES).map(|i| self.get_frame_score(i)).sum())
-        } else {
-            None
-        }
+        if self.frames_left == 0 { Some((0..NUM_FRAMES).map(|i| self.get_frame_score(i)).sum()) }
+        else { None }
     }
 
     fn get_first_roll_after_next_frame(&self, frame_index: usize) -> u16 {
@@ -83,15 +78,10 @@ impl BowlingGame {
         let next_frame = &self.frames[frame_index + 1];
         let score = next_frame.first_roll.unwrap();
 
-        if !is_strike {
-            return score;
-        }
+        if !is_strike { return score; }
 
-        score + if let Some(second) = next_frame.second_roll {
-            second
-        } else {
-            self.get_first_roll_after_next_frame(frame_index)
-        }
+        score + if let Some(second) = next_frame.second_roll { second } 
+                else { self.get_first_roll_after_next_frame(frame_index) }
     }
 
     fn get_frame_score(&self, frame_index: usize) -> u16 {
@@ -110,34 +100,23 @@ impl BowlingGame {
 
     fn handle_second_roll(&mut self, first_roll: u16, pins: u16) -> Result<(), Error> {
         let pins_left = NUM_PINS_PER_FRAME - first_roll % NUM_PINS_PER_FRAME;
-
-        if pins > pins_left {
-            return Err(Error::NotEnoughPinsLeft);
-        } else if pins == pins_left && !self.is_fill_bill() {
-            self.next_kind = FrameKind::Spare;
-        }
-
+        if pins > pins_left { return Err(Error::NotEnoughPinsLeft); } 
+        else if pins == pins_left && !self.is_fill_bill() { self.next_kind = FrameKind::Spare; }
         self.get_current_frame().second_roll = Some(pins);
         self.complete_frame();
         Ok(())
     }
 
     fn handle_first_roll(&mut self, pins: u16) -> Result<(), Error> {
-        if pins > NUM_PINS_PER_FRAME {
-            return Err(Error::NotEnoughPinsLeft);
-        }
-
+        if pins > NUM_PINS_PER_FRAME { return Err(Error::NotEnoughPinsLeft); }
         self.initialize_current_frame(pins);
         self.complete_frame_if_necessary_after_first_roll(pins);
         Ok(())
     }
 
     fn is_fill_bill(&self) -> bool {
-        if let FrameKind::FillBill(_) = self.next_kind {
-            true
-        } else {
-            false
-        }
+        if let FrameKind::FillBill(_) = self.next_kind { true } 
+        else { false }
     }
 
     fn get_current_frame(&mut self) -> &mut Frame {
@@ -179,11 +158,8 @@ impl BowlingGame {
     }
 
     fn adjust_next_kind(&mut self) {
-        if self.frames_left == 0 {
-            self.set_to_fill_bill_if_need_be();
-        } else {
-            self.next_kind = FrameKind::default();
-        }
+        if self.frames_left == 0 { self.set_to_fill_bill_if_need_be(); } 
+        else { self.next_kind = FrameKind::default(); }
     }
 
     fn complete_frame(&mut self) {
