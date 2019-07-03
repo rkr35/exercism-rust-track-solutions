@@ -1,5 +1,4 @@
 #![warn(clippy::pedantic)]
-use std::cmp::Ordering;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -21,10 +20,14 @@ enum FrameKind {
     Normal,
     Spare,
     Strike,
-    FillBill(FillBillKind)
+    FillBill(FillBillKind),
 }
 
-impl Default for FrameKind { fn default() -> Self { FrameKind::Normal } }
+impl Default for FrameKind {
+    fn default() -> Self {
+        FrameKind::Normal
+    }
+}
 
 #[derive(Default)]
 struct Frame {
@@ -54,100 +57,138 @@ impl BowlingGame {
             return Err(Error::GameComplete);
         }
 
-        let current_frame = &mut self.frames[self.frame_cursor];
-        
-        let is_fill_bill = if let FrameKind::FillBill(_) = self.next_kind { true } else { false };
-
-        if let Some(first_roll) = current_frame.first_roll {
-            let pins_left = NUM_PINS_PER_FRAME - first_roll % NUM_PINS_PER_FRAME;
-
-            match pins.cmp(&pins_left) {
-                Ordering::Greater => return Err(Error::NotEnoughPinsLeft),
-                Ordering::Equal if !is_fill_bill => { self.next_kind = FrameKind::Spare; },
-                _ => (),
-            }
-            
-            current_frame.second_roll = Some(pins);
-
-            self.complete_frame();
+        if let Some(first_roll) = self.get_current_frame().first_roll {
+            self.handle_second_roll(first_roll, pins)?;
         } else {
-            if pins > NUM_PINS_PER_FRAME {
-                return Err(Error::NotEnoughPinsLeft);
-            }
-
-            *current_frame = Frame {
-                first_roll: Some(pins),
-                second_roll: None,
-            };
-
-            if let FrameKind::FillBill(FillBillKind::Spare) = self.next_kind {
-                self.complete_frame()
-            } else if !is_fill_bill && pins == NUM_PINS_PER_FRAME {
-                self.next_kind = FrameKind::Strike;
-                self.complete_frame();
-            }
+            self.handle_first_roll(pins)?;
         }
 
         Ok(())
     }
 
     pub fn score(&self) -> Option<u16> {
-        if self.frames_left > 0 {
-            return None;
+        if self.frames_left == 0 {
+            Some((0..NUM_FRAMES).map(|i| self.get_frame_score(i)).sum())
+        } else {
+            None
+        }
+    }
+
+    fn get_first_roll_after_next_frame(&self, frame_index: usize) -> u16 {
+        self.frames[frame_index + 2].first_roll.unwrap()
+    }
+
+    fn get_spare_or_strike_bonus_score(&self, frame_index: usize, is_strike: bool) -> u16 {
+        let next_frame = &self.frames[frame_index + 1];
+        let mut score = next_frame.first_roll.unwrap();
+
+        if !is_strike {
+            return score;
         }
 
-        let mut sum = 0;
-            
-        for i in 0..NUM_FRAMES {
-            let frame = &self.frames[i];
-            let first = frame.first_roll.unwrap();
-            let second = frame.second_roll.unwrap_or(0);
-
-            let frame_score = first + second;
-            sum += frame_score;
-
-            if frame_score == NUM_PINS_PER_FRAME {
-                let next_frame = &self.frames[i + 1];
-                sum += next_frame.first_roll.unwrap();
-
-                let is_strike = first == NUM_PINS_PER_FRAME;
-
-                if is_strike {
-                    if let Some(second) = next_frame.second_roll {
-                        sum += second;
-                    } else {
-                        sum += self.frames[i + 2].first_roll.unwrap();
-                    }
-                }
-            }
+        if let Some(second) = next_frame.second_roll {
+            score += second;
+        } else {
+            score += self.get_first_roll_after_next_frame(frame_index);
         }
+
+        score
+    }
+
+    fn get_frame_score(&self, frame_index: usize) -> u16 {
+        let Frame { first_roll, second_roll, .. } = &self.frames[frame_index];
+        let first = first_roll.unwrap();
+        let score = first + second_roll.unwrap_or(0);
+        let is_spare_or_strike = score == NUM_PINS_PER_FRAME;
+
+        score + if is_spare_or_strike { 
+            self.get_spare_or_strike_bonus_score(frame_index, first == NUM_PINS_PER_FRAME)
+        } else {
+            0
+        }
+    }
+
+    fn handle_second_roll(&mut self, first_roll: u16, pins: u16) -> Result<(), Error> {
+        let pins_left = NUM_PINS_PER_FRAME - first_roll % NUM_PINS_PER_FRAME;
+
+        if pins > pins_left {
+            return Err(Error::NotEnoughPinsLeft);
+        } else if pins == pins_left && !self.is_fill_bill() {
+            self.next_kind = FrameKind::Spare;
+        }
+
+        self.get_current_frame().second_roll = Some(pins);
+        self.complete_frame();
+        Ok(())
+    }
+
+    fn handle_first_roll(&mut self, pins: u16) -> Result<(), Error> {
+        if pins > NUM_PINS_PER_FRAME {
+            return Err(Error::NotEnoughPinsLeft);
+        }
+
+        self.initialize_current_frame(pins);
+        self.complete_frame_if_necessary_after_first_roll(pins);
+        Ok(())
+    }
+
+    fn is_fill_bill(&self) -> bool {
+        if let FrameKind::FillBill(_) = self.next_kind {
+            true
+        } else {
+            false
+        }
+    }
+
+    fn get_current_frame(&mut self) -> &mut Frame {
+        &mut self.frames[self.frame_cursor]
+    }
+
+    fn initialize_current_frame(&mut self, first_roll_pins: u16) {
+        *self.get_current_frame() = Frame {
+            first_roll: Some(first_roll_pins),
+            second_roll: None,
+        };
+    }
+
+    fn complete_frame_if_necessary_after_first_roll(&mut self, first_roll_pins: u16) {
+        if let FrameKind::FillBill(FillBillKind::Spare) = self.next_kind {
+            self.complete_frame()
+        } else if first_roll_pins == NUM_PINS_PER_FRAME && !self.is_fill_bill() {
+            self.next_kind = FrameKind::Strike;
+            self.complete_frame();
+        }
+    }
+
+    fn set_to_fill_bill_if_need_be(&mut self) {
+        use FrameKind::*;
         
-        Some(sum)
+        match self.next_kind {
+            Spare => {
+                self.next_kind = FillBill(FillBillKind::Spare);
+                self.frames_left = 1;
+            }
+
+            Strike => {
+                self.next_kind = FillBill(FillBillKind::Strike);
+                self.frames_left = 1;
+            }
+
+            _ => (),
+        };
+    }
+
+    fn adjust_next_kind(&mut self) {
+        if self.frames_left == 0 {
+            self.set_to_fill_bill_if_need_be();
+        } else {
+            self.next_kind = FrameKind::default();
+        }
     }
 
     fn complete_frame(&mut self) {
         self.frames_left -= 1;
-
-        if self.frames_left == 0 {
-            use FrameKind::*;
-
-            match self.next_kind {
-                Spare => {
-                    self.next_kind = FillBill(FillBillKind::Spare);
-                    self.frames_left = 1;
-                }
-
-                Strike => {
-                    self.next_kind = FillBill(FillBillKind::Strike);
-                    self.frames_left = 1;
-                }
-
-                _ => (),
-            };
-        } else {
-            self.next_kind = FrameKind::default();
-        }
-
         self.frame_cursor += 1;
+        self.adjust_next_kind();
     }
 }
