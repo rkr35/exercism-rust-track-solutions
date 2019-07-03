@@ -1,13 +1,14 @@
 #![warn(clippy::pedantic)]
 
+const NUM_FRAMES: usize = 10;
+const NUM_PINS_PER_FRAME: u16 = 10;
+
+
 #[derive(Debug, PartialEq)]
 pub enum Error {
     NotEnoughPinsLeft,
     GameComplete,
 }
-
-const NUM_FRAMES: usize = 10;
-const NUM_PINS_PER_FRAME: u16 = 10;
 
 #[derive(Debug)]
 enum FillBillKind {
