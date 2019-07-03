@@ -2,6 +2,8 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
+type AllStats<'a> = HashMap<&'a str, Stats>;
+
 #[derive(Default)]
 struct Stats {
     matches: u8,
@@ -9,37 +11,6 @@ struct Stats {
     drew: u8,
     loss: u8,
     points: u16,
-}
-
-type AllStatsInternal<'a> = HashMap<&'a str, Stats>;
-
-#[derive(Default)]
-struct AllStats<'a>(AllStatsInternal<'a>);
-
-impl<'a> AllStats<'a> {
-    fn update_team(&mut self, team: &'a str, conclusion: &'a str) {
-        self.0.entry(team).or_default().update(conclusion);
-    }
-
-    fn update(&mut self, first_team: &'a str, second_team: &'a str, conclusion: &'a str) {
-        self.update_team(first_team, conclusion);
-
-        self.update_team(second_team, match conclusion {
-            "win" => "loss",
-            "loss" => "win",
-            "draw" => "draw",
-            _ => unreachable!("Encountered unknown conclusion when finding opposite (\"{}\")", conclusion),
-        });
-    }
-}
-
-impl<'a> IntoIterator for AllStats<'a> {
-    type Item = <AllStatsInternal<'a> as IntoIterator>::Item;
-    type IntoIter = <AllStatsInternal<'a> as IntoIterator>::IntoIter;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
 }
 
 impl Stats {
@@ -66,6 +37,21 @@ fn get_header() -> String {
 }
 
 fn parse_team_stats(match_results: &str) -> AllStats {
+    fn update<'a>(stats: &mut AllStats<'a>, first_team: &'a str, second_team: &'a str, conclusion: &str) {
+        fn update_team<'a>(stats: &mut AllStats<'a>, team: &'a str, conclusion: &str) {
+            stats.entry(team).or_default().update(conclusion);
+        }
+
+        update_team(stats, first_team, conclusion);
+
+        update_team(stats, second_team, match conclusion {
+            "win" => "loss",
+            "loss" => "win",
+            "draw" => "draw",
+            _ => unreachable!("Encountered unknown conclusion when finding opposite (\"{}\")", conclusion),
+        });
+    }
+
     let mut line: [&str; 3] = Default::default();
     let mut team_stats: AllStats = Default::default();
 
@@ -73,9 +59,9 @@ fn parse_team_stats(match_results: &str) -> AllStats {
         cursor %= line.len();
         line[cursor] = piece;
 
-        if cursor + 1 != line.len() {
+        if cursor + 1 == line.len() {
             let [first_team, second_team, conclusion] = line;
-            team_stats.update(first_team, second_team, conclusion);
+            update(&mut team_stats, first_team, second_team, conclusion);
         }
     }
 
