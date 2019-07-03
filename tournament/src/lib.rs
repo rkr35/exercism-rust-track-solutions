@@ -11,27 +11,44 @@ struct Stats {
     points: u16,
 }
 
+type AllStatsInternal<'a> = HashMap<&'a str, Stats>;
+
+#[derive(Default)]
+struct AllStats<'a>(AllStatsInternal<'a>);
+
+impl<'a> AllStats<'a> {
+    fn update_team(&mut self, team: &'a str, conclusion: &'a str) {
+        self.0.entry(team).or_default().update(conclusion);
+    }
+
+    fn update(&mut self, first_team: &'a str, second_team: &'a str, conclusion: &'a str) {
+        self.update_team(first_team, conclusion);
+
+        self.update_team(second_team, match conclusion {
+            "win" => "loss",
+            "loss" => "win",
+            "draw" => "draw",
+            _ => unreachable!("Encountered unknown conclusion when finding opposite (\"{}\")", conclusion),
+        });
+    }
+}
+
+impl<'a> IntoIterator for AllStats<'a> {
+    type Item = <AllStatsInternal<'a> as IntoIterator>::Item;
+    type IntoIter = <AllStatsInternal<'a> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 impl Stats {
     fn update(&mut self, conclusion: &str) {
         match conclusion {
-            "win" => {
-                const POINTS_FOR_WIN: u16 = 3;
-                self.won += 1;
-                self.points += POINTS_FOR_WIN;
-            }
-
-            "draw" => {
-                const POINTS_FOR_DRAW: u16 = 1;
-                self.drew += 1;
-                self.points += POINTS_FOR_DRAW;
-            }
-
+            "win" => { self.won += 1; self.points += 3; }
+            "draw" => { self.drew += 1; self.points += 1; }
             "loss" => self.loss += 1,
-
-            _ => unimplemented!(
-                "update() not implemented for conclusion of \"{}\"",
-                conclusion
-            ),
+            _ => unimplemented!("update() not implemented for conclusion of \"{}\"", conclusion),
         };
 
         self.matches += 1;
@@ -55,50 +72,21 @@ pub fn tally(match_results: &str) -> String {
 
     let mut pieces = match_results.split(';').flat_map(|s| s.split('\n'));
 
-    let mut line: [Option<&str>; 3] = Default::default();
+    let mut line: [&str; 3] = Default::default();
     let mut line_cursor = 0;
 
-    let mut team_stats: HashMap<_, Stats> = HashMap::new();
+    let mut team_stats: AllStats = Default::default();
 
     while let Some(piece) = pieces.next() {
-        line[line_cursor] = Some(piece);
+        line[line_cursor] = piece;
         line_cursor += 1;
 
-        if line_cursor != line.len() {
-            continue;
+        if line_cursor == line.len() {
+            let [first_team, second_team, conclusion] = line;
+            team_stats.update(first_team, second_team, conclusion);
+            line = Default::default();
+            line_cursor = 0;
         }
-
-        let [first_team, second_team, conclusion] = line;
-
-        let [first_team, second_team, conclusion] = [
-            first_team.unwrap(),
-            second_team.unwrap(),
-            conclusion.unwrap(),
-        ];
-
-        let opposite_conclusion = match conclusion {
-            "win" => "loss",
-            "loss" => "win",
-            "draw" => "draw",
-
-            _ => unreachable!(
-                "Encountered unknown conclusion when finding opposite (\"{}\")",
-                conclusion
-            ),
-        };
-
-        team_stats
-            .entry(first_team)
-            .or_default()
-            .update(conclusion);
-
-        team_stats
-            .entry(second_team)
-            .or_default()
-            .update(opposite_conclusion);
-
-        line = Default::default();
-        line_cursor = 0;
     }
 
     let mut team_stats: Vec<_> = team_stats.into_iter().collect();
