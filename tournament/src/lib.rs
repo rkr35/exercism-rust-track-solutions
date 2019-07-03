@@ -1,8 +1,6 @@
 #![warn(clippy::pedantic)]
-use std::collections::HashMap;
 use std::cmp::Ordering;
-
-type Name = String;
+use std::collections::HashMap;
 
 #[derive(Default)]
 struct Stats {
@@ -30,14 +28,21 @@ impl Stats {
 
             "loss" => self.loss += 1,
 
-            _ => unimplemented!("update() not implemented for conclusion of \"{}\"", conclusion)
+            _ => unimplemented!(
+                "update() not implemented for conclusion of \"{}\"",
+                conclusion
+            ),
         };
 
         self.matches += 1;
     }
 }
 
-macro_rules! row_format {($($arg:expr),+) => {format!("{:31}|{:>width$} |{:>width$} |{:>width$} |{:>width$} |{:>width$}", $($arg,)+ width=3)};}
+macro_rules! row_format {
+    ($($arg:expr),+) => {
+        format!("{:31}|{:>width$} |{:>width$} |{:>width$} |{:>width$} |{:>width$}", $($arg,)+ width=3)
+    };
+}
 
 fn get_header() -> String {
     row_format!("Team", "MP", "W", "D", "L", "P")
@@ -48,22 +53,53 @@ pub fn tally(match_results: &str) -> String {
         return get_header();
     }
 
-    let mut team_stats: HashMap<Name, Stats> = HashMap::new();
-    let split: Vec<_> = match_results.split(';').collect();
-    
-    let first_team = split[0];
-    let second_team = split[1];
-    let conclusion = split[2];
+    let mut pieces = match_results.split(';').flat_map(|s| s.split('\n'));
 
-    let opposite_conclusion = match conclusion {
-        "win" => "loss",
-        "loss" => "win",
-        "draw" => "draw",
-        _ => unreachable!("Encountered unknown conclusion when finding opposite (\"{}\")", conclusion)
-    };
+    let mut line: [Option<&str>; 3] = Default::default();
+    let mut line_cursor = 0;
 
-    team_stats.entry(first_team.to_string()).or_default().update(conclusion);
-    team_stats.entry(second_team.to_string()).or_default().update(opposite_conclusion);
+    let mut team_stats: HashMap<_, Stats> = HashMap::new();
+
+    while let Some(piece) = pieces.next() {
+        line[line_cursor] = Some(piece);
+        line_cursor += 1;
+
+        if line_cursor != line.len() {
+            continue;
+        }
+
+        let [first_team, second_team, conclusion] = line;
+
+        let [first_team, second_team, conclusion] = [
+            first_team.unwrap(),
+            second_team.unwrap(),
+            conclusion.unwrap(),
+        ];
+
+        let opposite_conclusion = match conclusion {
+            "win" => "loss",
+            "loss" => "win",
+            "draw" => "draw",
+
+            _ => unreachable!(
+                "Encountered unknown conclusion when finding opposite (\"{}\")",
+                conclusion
+            ),
+        };
+
+        team_stats
+            .entry(first_team)
+            .or_default()
+            .update(conclusion);
+
+        team_stats
+            .entry(second_team)
+            .or_default()
+            .update(opposite_conclusion);
+
+        line = Default::default();
+        line_cursor = 0;
+    }
 
     let mut team_stats: Vec<_> = team_stats.into_iter().collect();
 
@@ -74,11 +110,20 @@ pub fn tally(match_results: &str) -> String {
         }
     });
 
-    get_header() + "\n" + 
-    
-    &team_stats
-        .into_iter()
-        .map(|(name, stats)| row_format!(name, stats.matches, stats.won, stats.drew, stats.loss, stats.points))
-        .collect::<Vec<_>>()
-        .join("\n")
+    get_header()
+        + "\n"
+        + &team_stats
+            .into_iter()
+            .map(|(name, stats)| {
+                row_format!(
+                    name,
+                    stats.matches,
+                    stats.won,
+                    stats.drew,
+                    stats.loss,
+                    stats.points
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
 }
