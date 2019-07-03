@@ -80,19 +80,17 @@ impl BowlingGame {
 
     fn get_spare_or_strike_bonus_score(&self, frame_index: usize, is_strike: bool) -> u16 {
         let next_frame = &self.frames[frame_index + 1];
-        let mut score = next_frame.first_roll.unwrap();
+        let score = next_frame.first_roll.unwrap();
 
         if !is_strike {
             return score;
         }
 
-        if let Some(second) = next_frame.second_roll {
-            score += second;
+        score + if let Some(second) = next_frame.second_roll {
+            second
         } else {
-            score += self.get_first_roll_after_next_frame(frame_index);
+            self.get_first_roll_after_next_frame(frame_index)
         }
-
-        score
     }
 
     fn get_frame_score(&self, frame_index: usize) -> u16 {
