@@ -24,11 +24,7 @@ enum FrameKind {
     FillBill(FillBillKind),
 }
 
-impl Default for FrameKind {
-    fn default() -> Self {
-        FrameKind::Normal
-    }
-}
+impl Default for FrameKind { fn default() -> Self { FrameKind::Normal } }
 
 #[derive(Default)]
 struct Frame {
