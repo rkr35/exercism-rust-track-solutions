@@ -51,13 +51,8 @@ impl BowlingGame {
 
     pub fn roll(&mut self, pins: u16) -> Result<(), Error> {
         if self.frames_left == 0 { return Err(Error::GameComplete); }
-
-        if let Some(first_roll) = self.get_current_frame().first_roll {
-            self.handle_second_roll(first_roll, pins)?;
-        } else {
-            self.handle_first_roll(pins)?;
-        }
-
+        if let Some(first_roll) = self.get_current_frame().first_roll { self.handle_second_roll(first_roll, pins)?; } 
+        else { self.handle_first_roll(pins)?; }
         Ok(())
     }
 
