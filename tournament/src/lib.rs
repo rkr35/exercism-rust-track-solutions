@@ -68,13 +68,10 @@ fn parse_team_stats(match_results: &str) -> AllStats {
     team_stats
 }
 
-pub fn tally(match_results: &str) -> String {
-    if match_results.is_empty() {
-        return get_header();
-    }
-
+fn get_stat_rows(match_results: &str) -> Vec<String> {
     let mut team_stats: Vec<_> = parse_team_stats(match_results).into_iter().collect();
 
+    // Sort by points and then team name.
     team_stats.sort_unstable_by(|(name1, stats1), (name2, stats2)| {
         match stats2.points.cmp(&stats1.points) {
             Ordering::Equal => name1.cmp(name2),
@@ -82,10 +79,17 @@ pub fn tally(match_results: &str) -> String {
         }
     });
 
-    get_header() + "\n" + 
-    &team_stats
+    team_stats
         .into_iter()
         .map(|(name, stats)| row_format!(name, stats.matches, stats.won, stats.drew, stats.loss, stats.points))
         .collect::<Vec<_>>()
-        .join("\n")
+}
+
+pub fn tally(match_results: &str) -> String {
+    if match_results.is_empty() { 
+        get_header() 
+    }
+    else {
+        get_header() + "\n" + &get_stat_rows(match_results).join("\n") 
+    }
 }
