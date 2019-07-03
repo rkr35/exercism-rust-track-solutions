@@ -99,8 +99,9 @@ impl BowlingGame {
         let score = first + second_roll.unwrap_or(0);
         let is_spare_or_strike = score == NUM_PINS_PER_FRAME;
 
-        score + if is_spare_or_strike { 
-            self.get_spare_or_strike_bonus_score(frame_index, first == NUM_PINS_PER_FRAME)
+        score + if is_spare_or_strike {
+            let is_strike = first == NUM_PINS_PER_FRAME;
+            self.get_spare_or_strike_bonus_score(frame_index, is_strike)
         } else {
             0
         }
