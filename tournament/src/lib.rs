@@ -65,31 +65,29 @@ fn get_header() -> String {
     row_format!("Team", "MP", "W", "D", "L", "P")
 }
 
+fn parse_team_stats(match_results: &str) -> AllStats {
+    let mut line: [&str; 3] = Default::default();
+    let mut team_stats: AllStats = Default::default();
+
+    for (mut cursor, piece) in match_results.split(';').flat_map(|s| s.split('\n')).enumerate() {
+        cursor %= line.len();
+        line[cursor] = piece;
+
+        if cursor + 1 != line.len() {
+            let [first_team, second_team, conclusion] = line;
+            team_stats.update(first_team, second_team, conclusion);
+        }
+    }
+
+    team_stats
+}
+
 pub fn tally(match_results: &str) -> String {
     if match_results.is_empty() {
         return get_header();
     }
 
-    let mut pieces = match_results.split(';').flat_map(|s| s.split('\n'));
-
-    let mut line: [&str; 3] = Default::default();
-    let mut line_cursor = 0;
-
-    let mut team_stats: AllStats = Default::default();
-
-    while let Some(piece) = pieces.next() {
-        line[line_cursor] = piece;
-        line_cursor += 1;
-
-        if line_cursor == line.len() {
-            let [first_team, second_team, conclusion] = line;
-            team_stats.update(first_team, second_team, conclusion);
-            line = Default::default();
-            line_cursor = 0;
-        }
-    }
-
-    let mut team_stats: Vec<_> = team_stats.into_iter().collect();
+    let mut team_stats: Vec<_> = parse_team_stats(match_results).into_iter().collect();
 
     team_stats.sort_unstable_by(|(name1, stats1), (name2, stats2)| {
         match stats2.points.cmp(&stats1.points) {
@@ -98,20 +96,10 @@ pub fn tally(match_results: &str) -> String {
         }
     });
 
-    get_header()
-        + "\n"
-        + &team_stats
-            .into_iter()
-            .map(|(name, stats)| {
-                row_format!(
-                    name,
-                    stats.matches,
-                    stats.won,
-                    stats.drew,
-                    stats.loss,
-                    stats.points
-                )
-            })
-            .collect::<Vec<_>>()
-            .join("\n")
+    get_header() + "\n" + 
+    &team_stats
+        .into_iter()
+        .map(|(name, stats)| row_format!(name, stats.matches, stats.won, stats.drew, stats.loss, stats.points))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
