@@ -1,5 +1,4 @@
 #![warn(clippy::pedantic)]
-use std::cmp::Ordering;
 use std::collections::HashMap;
 
 pub fn tally(match_results: &str) -> String {
@@ -48,10 +47,7 @@ fn get_stat_rows(match_results: &str) -> Vec<String> {
 
     // Sort by points and then team name.
     team_stats.sort_unstable_by(|(name1, stats1), (name2, stats2)| {
-        match stats2.points.cmp(&stats1.points) {
-            Ordering::Equal => name1.cmp(name2),
-            points_ordering => points_ordering,
-        }
+        stats2.points.cmp(&stats1.points).then_with(|| name1.cmp(name2))
     });
 
     team_stats
