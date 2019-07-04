@@ -28,3 +28,4 @@ Cargo.lock
 ### Exercism
 .exercism
 # End of https://www.gitignore.io/api/rust,visualstudiocode
+alphametics/whiteboard.ora~
