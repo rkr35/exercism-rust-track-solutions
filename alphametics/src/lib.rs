@@ -23,24 +23,20 @@ fn has_unique_digits(number_to_check: usize,
     true
 }
 
-fn get_smallest_permutation(k: usize) -> usize {
+fn panic_on_digit_length_greater_than_base(k: usize) {
     if k > 10 {
         panic!("0 <= k <= 10. Passed in k = {}", k);
     }
+}
 
-    // 1 -> 0
-    // 2 -> 01
-    // 3 -> 012
-    // 4 -> 0123
+fn get_smallest_permutation(k: usize) -> usize {
+    panic_on_digit_length_greater_than_base(k);
+    (0..k).fold(0, |acc, current| acc * 10 + current)
+}
 
-    let mut permutation = 0;
-
-    for i in 0..k {
-        permutation *= 10;
-        permutation += i;
-    }
-
-    permutation
+fn get_largest_permutation(k: usize) -> usize {
+    panic_on_digit_length_greater_than_base(k);
+    (0..k).fold(0, |acc, current| acc * 10 + 9 - current)
 }
 
 pub fn solve(input: &str) -> Option<HashMap<char, u8>> {
@@ -68,9 +64,11 @@ pub fn solve(input: &str) -> Option<HashMap<char, u8>> {
 
     let num_letters = letters.len();
     let num_permutations: usize = ((11 - num_letters)..=10).product();
-
     let smallest_permutation = get_smallest_permutation(num_letters);
-    
+    let largest_permutation = get_largest_permutation(num_letters);
+
+    dbg!(smallest_permutation);
+    dbg!(largest_permutation);
 
     None
 }
