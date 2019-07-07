@@ -8,7 +8,6 @@ macro_rules! get_digits {
     ($number:expr, $num_digits:expr) => {
         (0..$num_digits)
             .map(move |digit_index| $number / 10_usize.pow(digit_index as u32) % 10)
-            .rev()
     };
 }
 
