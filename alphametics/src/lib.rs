@@ -3,6 +3,7 @@
 
 use std::collections::{HashMap, HashSet};
 use std::iter::once;
+use rayon::prelude::*;
 
 macro_rules! get_digits {
     ($number:expr, $num_digits:expr) => {
@@ -39,13 +40,11 @@ fn test_permutation(letters: &[(char, isize)], permutation: usize, first_letters
 }
 
 fn find_solution(letters: &[(char, isize)], first_letters: &HashSet<char>) -> Option<HashMap<char, u8>> {
-    (
-        (0..letters.len()).fold(0, |acc, current| acc * 10 + current) 
-        ..=
-        (0..letters.len()).fold(0, |acc, current| acc * 10 + 9 - current)
-    )
-    
-    .find_map(|permutation| test_permutation(&letters, permutation, first_letters))
+    let start = (0..letters.len()).fold(0, |acc, current| acc * 10 + current);
+    let end = (0..letters.len()).fold(0, |acc, current| acc * 10 + 9 - current);
+
+    (start..=end).into_par_iter()   
+        .find_map_first(|permutation| test_permutation(&letters, permutation, first_letters))
 }
 
 pub fn solve(input: &str) -> Option<HashMap<char, u8>> {
