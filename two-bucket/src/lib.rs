@@ -81,7 +81,10 @@ pub fn solve(capacity_1: u8, capacity_2: u8, goal: u8, start_bucket: &Bucket) ->
                 goal_bucket: initial_bucket.bucket,
                 other_bucket: other_bucket.filled
             };
-        } else if is_filled_to_goal(&other_bucket) {
+        }
+
+        if other_bucket.capacity == goal {
+            moves += 1;
             return BucketStats {
                 moves,
                 goal_bucket: other_bucket.bucket,
