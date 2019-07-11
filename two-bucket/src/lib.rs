@@ -1,3 +1,4 @@
+#![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 
 #[derive(PartialEq, Eq, Debug)]
@@ -22,7 +23,6 @@ pub struct BucketStats {
 pub fn solve(capacity_1: u8, capacity_2: u8, goal: u8, start_bucket: &Bucket) -> BucketStats {
     type PublicBucket = crate::Bucket;
 
-    #[derive(Debug)]
     struct Bucket {
         filled: u8,
         capacity: u8,
