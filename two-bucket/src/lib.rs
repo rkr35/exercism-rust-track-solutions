@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 #[derive(PartialEq, Eq, Debug)]
 pub enum Bucket {
     One,
@@ -52,21 +54,24 @@ pub fn solve(capacity_1: u8, capacity_2: u8, goal: u8, start_bucket: &Bucket) ->
             self.filled == 0
         }
 
-        fn r#move(&mut self, amount_from_me: u8, destination_bucket: &mut Bucket) {
+        fn r#move(&mut self, amount_from_me: u8, destination_bucket: &mut Self) {
             self.filled -= amount_from_me;
             destination_bucket.filled += amount_from_me;
         }
     }
-    
+
     let [mut initial_bucket, mut other_bucket] = {
         use crate::Bucket::*;
-        match start_bucket {
-            One => [Bucket::new(One, capacity_1), Bucket::new(Two, capacity_2)],
-            Two => [Bucket::new(Two, capacity_2), Bucket::new(One, capacity_1)],
+
+        let mut buckets = [Bucket::new(One, capacity_1), Bucket::new(Two, capacity_2)];
+
+        if let Two = start_bucket {
+            buckets.reverse();
         }
+
+        buckets
     };
-    
-    let is_filled_to_goal = |bucket: &Bucket| bucket.filled == goal;
+
     let mut moves = 0;
 
     loop {
@@ -75,22 +80,20 @@ pub fn solve(capacity_1: u8, capacity_2: u8, goal: u8, start_bucket: &Bucket) ->
             initial_bucket.fill();
         }
 
-        if is_filled_to_goal(&initial_bucket) {
+        if initial_bucket.filled == goal {
             return BucketStats {
                 moves,
                 goal_bucket: initial_bucket.bucket,
-                other_bucket: other_bucket.filled
+                other_bucket: other_bucket.filled,
             };
-        }
-
-        if other_bucket.capacity == goal {
+        } else if other_bucket.capacity == goal {
             moves += 1;
             return BucketStats {
                 moves,
                 goal_bucket: other_bucket.bucket,
-                other_bucket: initial_bucket.filled
+                other_bucket: initial_bucket.filled,
             };
-        } 
+        }
 
         if other_bucket.is_full() {
             moves += 1;
@@ -98,8 +101,15 @@ pub fn solve(capacity_1: u8, capacity_2: u8, goal: u8, start_bucket: &Bucket) ->
         }
 
         let how_much_left_to_fill_other_bucket = other_bucket.capacity - other_bucket.filled;
-        let how_much_to_move_from_initial_to_other_bucket = initial_bucket.filled.min(how_much_left_to_fill_other_bucket);
-        initial_bucket.r#move(how_much_to_move_from_initial_to_other_bucket, &mut other_bucket);
+        let how_much_to_move_from_initial_to_other_bucket = initial_bucket
+            .filled
+            .min(how_much_left_to_fill_other_bucket);
+
+        initial_bucket.r#move(
+            how_much_to_move_from_initial_to_other_bucket,
+            &mut other_bucket,
+        );
+
         moves += 1;
     }
 }
