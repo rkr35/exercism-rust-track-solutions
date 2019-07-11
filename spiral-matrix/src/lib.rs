@@ -22,7 +22,7 @@ pub fn spiral_matrix(size: u32) -> Vec<Vec<u32>> {
     // After the first row, segments come in pairs with the same length starting from n-1.
     // For example, for n=5, the first two segments after the first segment of length 5 will have length 4. 
     // Then the next two segments have length 3, and so on. The last two segments have length 1.
-    let segment_lengths: Vec<_> = (1..=size).rev().flat_map(|i| repeat(i).take(2)).skip(1).collect();
+    let segment_lengths = (1..=size).rev().flat_map(|i| repeat(i).take(2)).skip(1);
 
     for length in segment_lengths {
         // For each number belonging to this segment...
