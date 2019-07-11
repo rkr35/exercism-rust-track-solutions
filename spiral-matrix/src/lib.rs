@@ -4,7 +4,7 @@
 use std::iter::repeat;
 
 pub fn spiral_matrix(size: u32) -> Vec<Vec<u32>> {
-    let mut matrix: Vec<_> = {
+    let mut matrix = {
         let size = size as usize;
         vec![vec![0; size]; size]
     };
