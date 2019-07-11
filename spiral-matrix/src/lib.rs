@@ -4,8 +4,11 @@
 use std::iter::repeat;
 
 pub fn spiral_matrix(size: u32) -> Vec<Vec<u32>> {
-    let mut matrix: Vec<_> = (0..size).map(|_| vec![0; size as usize]).collect();
-
+    let mut matrix: Vec<_> = {
+        let size = size as usize;
+        vec![vec![0; size]; size]
+    };
+    
     // Cycle of right, down, left, and up directions.
     let mut directions = [[0, 1], [1, 0], [0, -1], [-1, 0]].iter().cycle();
     let mut direction = directions.next().unwrap();
