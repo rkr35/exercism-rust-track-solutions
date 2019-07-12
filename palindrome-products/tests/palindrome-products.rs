@@ -1,6 +1,7 @@
 use palindrome_products::*;
 
 #[test]
+#[ignore]
 fn single_digits() {
     let palindromes = get_palindrome_products(1, 9);
     assert_eq!(min(&palindromes), Some(1));
@@ -24,7 +25,6 @@ fn triple_digits() {
 }
 
 #[test]
-#[ignore]
 fn four_digits() {
     let palindromes = get_palindrome_products(1000, 9999);
     assert_eq!(min(&palindromes), Some(1002001));
