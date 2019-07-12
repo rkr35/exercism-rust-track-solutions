@@ -1,5 +1,7 @@
 pub type Palindrome = u64;
 pub fn get_palindrome_products(min: u64, max: u64) -> Vec<Palindrome> {
+    use rayon::prelude::*;
+
     fn is_palindrome(number: u64) -> bool {
         let number_of_digits = 1 + (number as f64).log10().floor() as u64;
 
@@ -19,7 +21,8 @@ pub fn get_palindrome_products(min: u64, max: u64) -> Vec<Palindrome> {
     }
 
     (min..=max)
-        .flat_map(|i| (i..=max).map(move |j| i * j))
+        .into_par_iter()
+        .flat_map(|i| (i..=max).into_par_iter().map(move |j| i * j))
         .filter(|&product| is_palindrome(product))
         .collect()
 }
