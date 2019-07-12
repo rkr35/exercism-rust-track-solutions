@@ -7,7 +7,7 @@ pub fn find_saddle_points(input: &[Vec<u64>]) -> Vec<(usize, usize)> {
     // row_maxes[i] contains the maximum element of row i.
     let mut row_maxes = vec![None; input.len()];
 
-    let num_columns = input.get(0).map_or(0, Vec::len);
+    let num_columns = input.first().map_or(0, Vec::len);
     
     // column_mins[i] contains the minimum element of column i.
     let mut column_mins = vec![None; num_columns];
