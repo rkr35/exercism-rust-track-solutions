@@ -10,17 +10,16 @@ pub fn check(candidate: &str) -> bool {
 
     candidate
         .chars()
-        .filter(|&character| character.is_alphabetic())
-        .map(|letter| letter.to_digit(ENGLISH_RADIX).expect("This implementation only works with the English alphabet."))
+        .filter_map(|character| character.to_digit(ENGLISH_RADIX))
         .all(|digit| {
             let seen_letters_index = digit as usize - NUM_UNIQUE_DIGITS;
             let already_seen = seen_letters[seen_letters_index];
 
             if already_seen {
-                return false;
-            } 
-
-            seen_letters[seen_letters_index] = true;
-            true
+                false
+            } else {
+                seen_letters[seen_letters_index] = true;
+                true
+            }
         })
 }
