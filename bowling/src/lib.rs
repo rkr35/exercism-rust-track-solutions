@@ -1,3 +1,5 @@
+#![no_std]
+
 #![warn(clippy::pedantic)]
 
 const NUM_FRAMES: usize = 10;
