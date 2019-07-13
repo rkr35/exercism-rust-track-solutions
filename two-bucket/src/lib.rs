@@ -1,3 +1,5 @@
+#![no_std]
+
 #![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 
