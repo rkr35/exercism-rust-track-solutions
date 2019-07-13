@@ -1,6 +1,7 @@
 #![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 
+/// This implementation only works for `candidates`s composed from letters in the English alphabet.
 pub fn check(candidate: &str) -> bool {
     const ALPHABET_SIZE: usize = 26;
     const NUM_UNIQUE_DIGITS: usize = 10;
