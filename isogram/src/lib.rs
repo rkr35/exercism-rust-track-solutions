@@ -1,14 +1,26 @@
 #![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 
-use std::collections::HashSet;
-
 pub fn check(candidate: &str) -> bool {
-    // todo: Is there a way to get rid of this heap allocation?
-    let mut seen_letters = HashSet::with_capacity(candidate.len());
+    const ALPHABET_SIZE: usize = 26;
+    const NUM_UNIQUE_DIGITS: usize = 10;
+    const ENGLISH_RADIX: u32 = (ALPHABET_SIZE + NUM_UNIQUE_DIGITS) as u32;
+
+    let mut seen_letters = [false; ALPHABET_SIZE];
 
     candidate
         .chars()
-        .filter(|&c| c.is_alphabetic())
-        .all(|letter| seen_letters.insert(letter.to_ascii_lowercase()))
+        .filter(|&character| character.is_alphabetic())
+        .map(|letter| letter.to_digit(ENGLISH_RADIX).expect("This implementation only works with the English alphabet."))
+        .all(|digit| {
+            let seen_letters_index = digit as usize - NUM_UNIQUE_DIGITS;
+            let already_seen = seen_letters[seen_letters_index];
+
+            if already_seen {
+                return false;
+            } 
+
+            seen_letters[seen_letters_index] = true;
+            true
+        })
 }
