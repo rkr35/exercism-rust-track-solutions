@@ -47,6 +47,39 @@ fn get_simplest(n: u64) -> String {
     }
 }
 
-pub fn encode(n: u64) -> String {
-    get_simplest(n).to_string()
+pub fn encode(mut n: u64) -> String {
+    // let num_digits = 1  + (n as f64).log10().floor() as u32;
+    // let digits = (0..num_digits).map(|digit_index| n / 10_u64.pow(digit_index) % 10);
+    // dbg!(digits.collect::<Vec<_>>());
+    if n == 0 {
+        return "zero".to_string();
+    }
+    
+    let mut encoded = vec![];
+    
+    let mut segment = 0;
+    const SEGMENTS: [&str; 6] = ["thousand", "million", "billion", "trillion", "quadrillion", "quintillion"];
+    
+    while n != 0 {
+        let right_three = n % 1000;
+
+        if right_three > 0 {
+            let mut number = get_simplest(right_three);
+
+            if segment > 0 {
+                let segment = SEGMENTS.get(segment - 1).expect("Received a number greater than u64::MAX");
+                number += " ";
+                number += segment;
+            }
+
+            encoded.push(number);
+        }
+
+        n /= 1000;
+        segment += 1;
+    }
+
+
+    encoded.reverse();
+    encoded.join(" ")
 }
