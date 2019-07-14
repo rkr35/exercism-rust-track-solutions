@@ -47,21 +47,25 @@ fn test_one_hundred() {
 
 // note, using American style with no and
 #[test]
+
 fn test_one_hundred_twenty() {
     assert_eq!(say::encode(120), String::from("one hundred twenty"));
 }
 
 #[test]
+
 fn test_one_hundred_twenty_three() {
     assert_eq!(say::encode(123), String::from("one hundred twenty-three"));
 }
 
 #[test]
+
 fn test_one_thousand() {
     assert_eq!(say::encode(1000), String::from("one thousand"));
 }
 
 #[test]
+
 fn test_one_thousand_two_hundred_thirty_four() {
     assert_eq!(
         say::encode(1234),
@@ -71,6 +75,7 @@ fn test_one_thousand_two_hundred_thirty_four() {
 
 // note, using American style with no and
 #[test]
+
 fn test_eight_hundred_and_ten_thousand() {
     assert_eq!(
         say::encode(810_000),
