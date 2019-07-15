@@ -1,38 +1,65 @@
-pub fn encode(source: &str) -> String {
-    let mut current_run_character = None;
-    let mut count = 0_usize;
-    let mut encoded = String::new();
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
 
-    fn encode_current(encoded: &mut String, current: char, count: usize) {
-        if count > 1 {
-            encoded.push_str(&count.to_string());
-        }
-        
-        encoded.push_str(&current.to_string());
-    }
+const MAX_HEAP_ALLOC_BYTES: usize = 16;
 
-    for character in source.chars() {
-        match current_run_character {
-            Some(current) => {
-                if character == current {
-                    count += 1;
-                } else {
-                    encode_current(&mut encoded, current, count);
-                    current_run_character = Some(character);
-                    count = 1;
-                }
-            },
+#[derive(Debug, Default)]
+struct Run {
+    character: u8,
+    count: usize
+}
 
-            None => {
-                current_run_character = Some(character);
-                count = 1;
+fn write(destination: &mut String, source: &Run) {
+    macro_rules! panic_if_reallocates {
+        ($num_bytes:expr) => {
+            if destination.len() + $num_bytes > destination.capacity() {
+                panic!("write(): writing {} bytes will cause a reallocation to the original buffer of {}/{} bytes",
+                    $num_bytes, destination.len(), destination.capacity());
             }
+        };
+    }
+
+    if source.count > 1 {
+        let num_digits = 1 + (source.count as f64)
+            .log10()
+            .floor() as usize;
+
+        panic_if_reallocates!(num_digits);
+
+        (0..num_digits)
+            .map(|i| source.count / 10_usize.pow(i as u32) % 10)
+            .map(|digit| ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"][digit])
+            .rev()
+            .for_each(|digit| destination.push_str(digit));
+    }
+
+    panic_if_reallocates!(1);
+
+    destination
+        .push_str(std::str::from_utf8(&[source.character])
+        .expect("Error converting a single u8 Run character into &str"));
+}
+
+pub fn encode(source: &str) -> String {
+    let current = source.bytes().nth(0).map(|character| Run { character, count: 1 });
+
+    if current.is_none() {
+        return String::new();
+    }
+
+    let mut current = current.expect("Tried to unwrap empty current Run");
+    let mut encoded = String::with_capacity(MAX_HEAP_ALLOC_BYTES);
+
+    for character in source.bytes().skip(1) {
+        if current.character == character {
+            current.count += 1;
+        } else {
+            write(&mut encoded, &current);
+            current = Run {character, count: 1};
         }
     }
 
-    if let Some(current) = current_run_character {
-        encode_current(&mut encoded, current, count);
-    }
+    write(&mut encoded, &current);
 
     encoded
 }
