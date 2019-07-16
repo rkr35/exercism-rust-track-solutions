@@ -1,11 +1,7 @@
 #![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 
-#[derive(Debug, Default)]
-struct Run {
-    character: u8,
-    count: usize
-}
+use crate::Run;
 
 #[derive(Debug)]
 pub struct ReallocateError {
@@ -16,15 +12,10 @@ pub struct ReallocateError {
 
 #[derive(Debug)]
 pub enum Error {
-    NonAsciiCharacter { 
-        character: u8, 
-        utf8_error: std::str::Utf8Error 
-    },
-
     DigitsReallocates(ReallocateError),
     
     CharacterReallocates {
-        character: u8,
+        character: char,
         reallocate_error: ReallocateError
     },
 
@@ -52,7 +43,7 @@ const DIGITS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 fn digits(destination: &mut String, mut number: usize) -> Result<(), Error> {
     let (digits, num_free_slots_left) = {
-        const MAX_NUMBER_OF_DIGITS: usize = 2;
+        const MAX_NUMBER_OF_DIGITS: usize = 3;
         let mut buffer = [0; MAX_NUMBER_OF_DIGITS];
         let mut num_added = 0;
 
@@ -108,21 +99,14 @@ fn to(destination: &mut String, source: &Run) -> Result<(), Error> {
         return Err(error);
     }
 
-    let character = [source.character];
-    let character = std::str::from_utf8(&character)
-        .map_err(|utf8_error| Error::NonAsciiCharacter {
-            character: source.character,
-            utf8_error
-        })?;
-
-    destination.push_str(character);
+    destination.push(source.character);
 
     Ok(())
 }
 
-pub fn up_to_specificed_heap_bytes(source: &str, max_heap_alloc_bytes: usize) -> Result<String, Error> {
-    let mut bytes = source.bytes();
-    let current = bytes.nth(0).map(|character| Run { character, count: 1 });
+pub fn up_to_specified_heap_bytes(source: &str, max_heap_alloc_bytes: usize) -> Result<String, Error> {
+    let mut chars = source.chars();
+    let current = chars.nth(0).map(|character| Run { character, count: 1 });
 
     if current.is_none() {
         return Ok(String::new());
@@ -131,7 +115,7 @@ pub fn up_to_specificed_heap_bytes(source: &str, max_heap_alloc_bytes: usize) ->
     let mut current = current.expect("Tried to unwrap empty current Run");
     let mut encoded = String::with_capacity(max_heap_alloc_bytes);
 
-    for character in bytes {
+    for character in chars {
         if current.character == character {
             current.count += 1;
         } else {
