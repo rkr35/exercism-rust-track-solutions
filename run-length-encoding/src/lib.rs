@@ -51,7 +51,7 @@ fn write(destination: &mut String, source: &Run) {
 }
 
 pub fn encode(source: &str) -> String {
-    const MAX_HEAP_ALLOC_BYTES: usize = 14;
+    const MAX_HEAP_ALLOC_BYTES: usize = 13;
 
     let mut bytes = source.bytes();
     let current = bytes.nth(0).map(|character| Run { character, count: 1 });
@@ -73,6 +73,10 @@ pub fn encode(source: &str) -> String {
     }
 
     write(&mut encoded, &current);
+
+    if encoded.capacity() != MAX_HEAP_ALLOC_BYTES {
+        panic!("`encoded` reallocated from {} bytes to {} bytes", MAX_HEAP_ALLOC_BYTES, encoded.capacity());
+    }
 
     encoded
 }
