@@ -7,6 +7,8 @@ struct Run {
     count: usize
 }
 
+const DIGITS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
 fn write_digits(destination: &mut String, mut number: usize) {
     let (digits, num_free_slots_left) = {
         const MAX_NUMBER_OF_DIGITS: usize = 2;
@@ -29,7 +31,7 @@ fn write_digits(destination: &mut String, mut number: usize) {
     };
 
     for &digit in digits.iter().rev().skip(num_free_slots_left) {
-        destination.push_str(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"][digit]);
+        destination.push_str(DIGITS[digit]);
     }
 }
 
