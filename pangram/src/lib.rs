@@ -1,3 +1,5 @@
+#![no_std]
+
 /// Determine whether a sentence is a pangram.
 pub fn is_pangram(sentence: &str) -> bool {
     const SEEN_ALL_LETTERS: u32 = (1 << 26) - 1;
