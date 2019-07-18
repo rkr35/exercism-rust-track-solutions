@@ -1,34 +1,21 @@
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
+
 /// Determines whether the supplied string is a valid ISBN number
 pub fn is_valid_isbn(isbn: &str) -> bool {
-    const X: u8 = 10;
-    let mut cursor = 0;
-    let mut sum = 0_usize;
+    const X: usize = 10;
 
-    for character in isbn.chars() {
-        let digit = if character.is_ascii_digit() {
-            character as u8 - b'0'
-        } else if character == 'X' {
-            let is_check_digit = cursor == X - 1;
-
-            if !is_check_digit {
-                // X is somewhere before the check digit.
-                return false;
-            }
-
-            X
-        } else {
-            continue;
-        };
-
-        if cursor == X {
-            // Too many digits.
-            return false;
-        }
-
-        sum += usize::from(digit * (X - cursor));
-        cursor += 1;
-    }
-
-    cursor == X &&
-        sum % 11 == 0
+    isbn
+        .chars()
+        .filter_map(|character|
+            if character.is_ascii_digit()                   { Some(character as usize - b'0' as usize) }
+            else if character == 'X'                        { Some(X) } 
+            else                                            { None }
+        )
+        .enumerate()
+        .try_fold((0, 0), |(sum, _), (cursor, digit)| 
+            if cursor >= X || digit == X && cursor != X - 1 { None }
+            else                                            { Some((sum + digit * (X - cursor), cursor + 1)) }
+        )
+        .map_or(false, |(sum, cursor)| sum % (X + 1) == 0 && cursor == X)
 }
