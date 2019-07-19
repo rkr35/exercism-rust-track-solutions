@@ -40,23 +40,39 @@ pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>,
     if from_base < 2    { return Err(Error::InvalidInputBase); }
     else if to_base < 2 { return Err(Error::InvalidOutputBase); }
 
-    let mut number = number.iter().try_fold(0, |n, &digit| 
+    // First, figure out what number the collection of digits represents.
+    let mut number = number.iter().try_fold(0, |n, &digit|
         if digit < from_base { Ok(n * from_base + digit) }
         else                 { Err(Error::InvalidDigit(digit)) }
     )?;
 
+    // Returns the largest integer k such that to_base.pow(k) <= n.
+    // Used to determine the farthest left digit of `number` in base `to_base`.
     let largest_power = |n| (f64::from(n)).log(f64::from(to_base)) as u32;
+
+    // Calculate the number of digits in the final base.
     let mut power = largest_power(number);
-    let num_final_digits = power as usize + if number == 0 { 0 } else { 1 };
+    let num_final_digits = power as usize + (number > 0) as usize;
+
+    // Allocate our collection of digits with the appropriate capacity.
     let mut converted = vec![0; num_final_digits];
 
-    dbg!(number, power, num_final_digits, &converted);
-
+    // While there are still parts of the number to convert...
     while number > 0 {
+        // Find the largest power that is <= the number.
         let largest_base_multiple = to_base.pow(power);
+
+        // Find the digit in `to_base` that corresponds to the largest multiple of the largest power.
         let k = number / largest_base_multiple;
+
+        // See that digit in our collection of digits.
         converted[num_final_digits - power as usize - 1] = k;
+
+        // Remove the largest multiple from the number.
         number -= k * largest_base_multiple;
+
+        // Find the next largest power that fits in whatever is left after
+        // the subtraction.
         power = largest_power(number);
     }
 
