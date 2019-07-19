@@ -50,31 +50,20 @@ pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>,
     )?;
 
     if number == 0 {
-        return Ok(vec![]);
+        Ok(vec![])
+    } else {
+        // Calculate the number of digits in the final base.
+        let num_final_digits = 1 + (f64::from(number)).log(f64::from(to_base)) as usize;
+
+        // Allocate our final digits collection.
+        let mut converted = vec![0; num_final_digits];
+
+        // Set each digit.
+        converted.iter_mut().rev().for_each(|place| { 
+            *place = number % to_base; 
+            number /= to_base; 
+        });
+
+        Ok(converted)
     }
-
-    // Calculate the number of digits in the final base.
-    let num_final_digits = 1 + (f64::from(number)).log(f64::from(to_base)) as usize;
-
-    // Allocate our collection of digits with the appropriate capacity.
-    let mut converted = vec![0; num_final_digits];
-
-    let mut cursor = converted.iter_mut().rev();
-
-    // While there are parts of the number to convert...
-    while number > 0 {
-        // Get a mutable reference to the next digit place.
-        let cursor = cursor.next().expect("Cursor is out-of-bounds");
-
-        // Calculate the digit that should be in this place.
-        let digit = number % to_base;
-        
-        // Set the digit.
-        *cursor = digit;
-
-        // Shift the number to the next digit place.
-        number /= to_base;
-    }
-
-    Ok(converted)
 }
