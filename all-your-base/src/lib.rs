@@ -37,10 +37,28 @@ pub enum Error {
 ///     process input with leading 0 digits.
 ///
 pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>, Error> {
-    unimplemented!(
-        "Convert {:?} from base {} to base {}",
-        number,
-        from_base,
-        to_base
-    )
+    if from_base < 2    { return Err(Error::InvalidInputBase); }
+    else if to_base < 2 { return Err(Error::InvalidOutputBase); }
+
+    let mut number = number.iter().try_fold(0, |n, &digit| 
+        if digit < from_base { Ok(n * from_base + digit) }
+        else                 { Err(Error::InvalidDigit(digit)) }
+    )?;
+
+    let largest_power = |n| (f64::from(n)).log(f64::from(to_base)) as u32;
+    let mut power = largest_power(number);
+    let num_final_digits = power as usize + if number == 0 { 0 } else { 1 };
+    let mut converted = vec![0; num_final_digits];
+
+    dbg!(number, power, num_final_digits, &converted);
+
+    while number > 0 {
+        let largest_base_multiple = to_base.pow(power);
+        let k = number / largest_base_multiple;
+        converted[num_final_digits - power as usize - 1] = k;
+        number -= k * largest_base_multiple;
+        power = largest_power(number);
+    }
+
+    Ok(converted)
 }
