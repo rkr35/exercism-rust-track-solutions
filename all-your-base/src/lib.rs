@@ -57,19 +57,21 @@ pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>,
     // Allocate our collection of digits with the appropriate capacity.
     let mut converted = vec![0; num_final_digits];
 
-    // While there are still parts of the number to convert...
+    // While there are parts of the number to convert...
     while number > 0 {
         // Find the largest power that is <= the number.
         let largest_base_multiple = to_base.pow(power);
 
-        // Find the digit in `to_base` that corresponds to the largest multiple of the largest power.
-        let k = number / largest_base_multiple;
+        // Find the digit in `to_base` that corresponds to the 
+        // largest multiple of the largest power.
+        let digit = number / largest_base_multiple;
 
-        // See that digit in our collection of digits.
-        converted[num_final_digits - power as usize - 1] = k;
+        // Set that digit in our collection of digits.
+        let digit_place = num_final_digits - power as usize - 1;
+        converted[digit_place] = digit;
 
         // Remove the largest multiple from the number.
-        number -= k * largest_base_multiple;
+        number -= digit * largest_base_multiple;
 
         // Find the next largest power that fits in whatever is left after
         // the subtraction.
