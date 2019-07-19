@@ -18,9 +18,8 @@ pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>,
         else                 { Err(Error::InvalidDigit(digit)) }
     )?;
 
-    if number == 0 {
-        Ok(vec![])
-    } else {
+    if number == 0 { Ok(vec![]) } 
+    else {
         // Calculate the number of digits in the final base.
         let num_final_digits = 1 + (f64::from(number)).log(f64::from(to_base)) as usize;
 
