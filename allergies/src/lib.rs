@@ -7,15 +7,20 @@ pub struct Allergies {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Allergen {
-    Eggs            = 0,
-    Peanuts         = 1,
-    Shellfish       = 2,
-    Strawberries    = 3,
-    Tomatoes        = 4,
-    Chocolate       = 5,
-    Pollen          = 6,
-    Cats            = 7,
+    Eggs,
+    Peanuts,
+    Shellfish,
+    Strawberries,
+    Tomatoes,
+    Chocolate,
+    Pollen,
+    Cats,
 }
+
+const ALLERGENS: [Allergen; 8] = {
+    use Allergen::*;
+    [Eggs, Peanuts, Shellfish, Strawberries, Tomatoes, Chocolate, Pollen, Cats]
+};
 
 impl Allergies {
     pub fn new(score: u32) -> Self {
@@ -28,6 +33,10 @@ impl Allergies {
     }
 
     pub fn allergies(&self) -> Vec<Allergen> {
-        unimplemented!("Return the list of allergens contained within the score with which the Allergies struct was made.");
+        ALLERGENS
+            .iter()
+            .filter(|allergen| self.is_allergic_to(allergen))
+            .copied()
+            .collect()
     }
 }
