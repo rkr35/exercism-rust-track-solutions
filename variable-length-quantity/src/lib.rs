@@ -13,7 +13,7 @@ type Value = u32;
 type Byte = u8;
 
 /// Convert a list of numbers to a stream of bytes encoded with variable length encoding.
-pub fn to_bytes(values: &[Value]) -> Vec<u8> {
+pub fn to_bytes(values: &[Value]) -> Vec<Byte> {
     // The number of significants bits per encoded byte.
     const GROUP_SIZE: Value = 7;
 
