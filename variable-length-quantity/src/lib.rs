@@ -1,5 +1,3 @@
-use std::iter::once;
-
 #[derive(Debug, PartialEq)]
 pub enum Error {
     IncompleteNumber,
@@ -29,7 +27,7 @@ pub fn to_bytes(values: &[Value]) -> Vec<Byte> {
     // The number of bits per input value.
     // Used to determine how many groups of GROUP_SIZE the final encoding
     // should have for each input value.
-    const BITS_PER_VALUE: Value = 8 * std::mem::size_of::<Value>() as Value;
+    const BITS_PER_VALUE: Value = (0 as Value).count_zeros();
 
     values
         .iter()
@@ -58,7 +56,7 @@ pub fn to_bytes(values: &[Value]) -> Vec<Byte> {
                 .map(move |i| get_group(i) | CONTINUE_MASK as Byte)
 
             // Then encode the last group, which we won't set the continuation bit for.
-                .chain(once(get_group(0)))
+                .chain(std::iter::once(get_group(0)))
         })
         .collect()
 }
