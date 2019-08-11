@@ -1,31 +1,36 @@
 pub fn translate(input: &str) -> String {
-    const VOWELS: [char; 5] = ['a', 'e', 'i', 'o', 'u'];
-    
-    let input = input.to_string();
+    use lazy_static::lazy_static;
+    use regex::Regex;
+    use std::borrow::Cow::Owned;
 
-    let first_letter = input.chars().nth(0);
+    fn translate_word(word: &str) -> String {
+        lazy_static! {
+            static ref RULE_1: Regex = Regex::new(r"^(?:[aeiou]|xr|yt)\w*$").unwrap();
+            static ref RULE_2: Regex = Regex::new(r"^(?P<consonant>[^aeiou]+)(?P<rest>\w*)$").unwrap();
+            static ref RULE_3: Regex = Regex::new(r"^(?P<consonant>[^aeiou]*)qu(?P<rest>\w*)$").unwrap();
+            static ref RULE_4: Regex = Regex::new(r"^(?P<consonant>[^aeiou]+)y(?P<rest>\w*)$").unwrap();
+        }
 
-    if first_letter.is_none() {
-        return input;
+        let word = word.to_string();
+
+        if RULE_1.is_match(&word) {
+            return word + "ay";
+        }
+
+        if let Owned(replaced) = RULE_4.replace(&word, "y${rest}${consonant}ay") {
+            replaced
+        } else if let Owned(replaced) = RULE_3.replace(&word, "${rest}${consonant}quay") {
+            replaced
+        } else if let Owned(replaced) = RULE_2.replace(&word, "${rest}${consonant}ay") {
+            replaced
+        } else {
+            unreachable!("Encountered an word that does not match any of the rules: {}", word);
+        }
     }
 
-    let first_letter = first_letter.unwrap();
-
-    let is_first_letter_a_vowel = VOWELS.contains(&first_letter);
-    
-    if is_first_letter_a_vowel {
-        input + "ay"
-    } else {
-        // Get the characters up to first vowel.
-        let index_of_last_consonant = input
-            .chars()
-            .enumerate()
-            .take_while(|(_, c)| !VOWELS.contains(&c))
-            .last()
-            .map(|(i, _)| i)
-            .unwrap();
-
-        dbg!(&input, &index_of_last_consonant);
-        format!("{}{}ay", &input[(1+index_of_last_consonant)..], &input[..=index_of_last_consonant])        
-    }
+    input
+        .split_ascii_whitespace()
+        .map(translate_word)
+        .collect::<Vec<_>>()
+        .join(" ")
 }

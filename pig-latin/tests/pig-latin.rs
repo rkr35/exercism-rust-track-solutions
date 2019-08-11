@@ -42,6 +42,7 @@ fn test_word_beginning_with_k() {
 
 #[test]
 fn test_word_beginning_with_y() {
+    // Rule 2
     assert_eq!(pl::translate("yellow"), "ellowyay");
 }
 
@@ -61,55 +62,46 @@ fn test_word_beginning_with_ch() {
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_qu() {
     assert_eq!(pl::translate("queen"), "eenquay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_qu_and_a_preceding_consonant() {
     assert_eq!(pl::translate("square"), "aresquay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_th() {
     assert_eq!(pl::translate("therapy"), "erapythay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_thr() {
     assert_eq!(pl::translate("thrush"), "ushthray");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_sch() {
     assert_eq!(pl::translate("school"), "oolschay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_yt() {
     assert_eq!(pl::translate("yttria"), "yttriaay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_xr() {
     assert_eq!(pl::translate("xray"), "xrayay");
 }
 
 #[test]
-#[ignore]
 fn test_y_is_treated_like_a_vowel_at_the_end_of_a_consonant_cluster() {
     assert_eq!(pl::translate("rhythm"), "ythmrhay");
 }
 
 #[test]
-#[ignore]
 fn test_a_whole_phrase() {
     assert_eq!(pl::translate("quick fast run"), "ickquay astfay unray");
 }
