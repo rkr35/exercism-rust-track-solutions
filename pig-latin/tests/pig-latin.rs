@@ -6,67 +6,56 @@ fn test_word_beginning_with_a() {
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_e() {
     assert_eq!(pl::translate("ear"), "earay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_i() {
     assert_eq!(pl::translate("igloo"), "iglooay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_o() {
     assert_eq!(pl::translate("object"), "objectay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_u() {
     assert_eq!(pl::translate("under"), "underay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_a_vowel_and_followed_by_a_qu() {
     assert_eq!(pl::translate("equal"), "equalay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_p() {
     assert_eq!(pl::translate("pig"), "igpay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_k() {
     assert_eq!(pl::translate("koala"), "oalakay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_y() {
     assert_eq!(pl::translate("yellow"), "ellowyay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_x() {
     assert_eq!(pl::translate("xenon"), "enonxay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_q_without_a_following_u() {
     assert_eq!(pl::translate("qat"), "atqay");
 }
 
 #[test]
-#[ignore]
 fn test_word_beginning_with_ch() {
     assert_eq!(pl::translate("chair"), "airchay");
 }
