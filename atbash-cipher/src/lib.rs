@@ -1,6 +1,7 @@
 /// "Encipher" with the Atbash cipher.
-pub fn encode(plain: &str) -> String {
-    const GROUP_SIZE: usize = 5;
+fn encode_using_group_size(plain: &str, group_size: Option<usize>) -> String {
+    let group_size = group_size.unwrap_or(std::usize::MAX);
+
     let mut s = plain
         .bytes()
         .filter_map(|c| if c.is_ascii_alphabetic() {
@@ -18,8 +19,8 @@ pub fn encode(plain: &str) -> String {
         .fold(String::with_capacity(plain.len()), |mut encoded, (i, c)| {
             encoded.push(c);
 
-            // If we're at the end of group...
-            if i % GROUP_SIZE == (GROUP_SIZE - 1) {
+            // If we're at the end of a group...
+            if i % group_size == (group_size - 1) {
                 // ...then append a space.
                 encoded += " ";
             }
@@ -38,7 +39,11 @@ pub fn encode(plain: &str) -> String {
     s
 }
 
+pub fn encode(plain: &str) -> String {
+    encode_using_group_size(plain, Some(5))
+}
+
 /// "Decipher" with the Atbash cipher.
 pub fn decode(cipher: &str) -> String {
-    unimplemented!("Decoding of {:?} in Atbash cipher.", cipher);
+    encode_using_group_size(cipher, None)
 }

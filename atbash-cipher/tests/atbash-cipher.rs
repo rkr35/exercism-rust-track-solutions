@@ -52,13 +52,11 @@ fn test_encode_ignores_non_ascii() {
 }
 
 #[test]
-#[ignore]
 fn test_decode_exercism() {
     assert_eq!("exercism", cipher::decode("vcvix rhn"));
 }
 
 #[test]
-#[ignore]
 fn test_decode_a_sentence() {
     assert_eq!(
         "anobstacleisoftenasteppingstone",
@@ -67,13 +65,13 @@ fn test_decode_a_sentence() {
 }
 
 #[test]
-#[ignore]
+
 fn test_decode_numbers() {
     assert_eq!("testing123testing", cipher::decode("gvhgr mt123 gvhgr mt"));
 }
 
 #[test]
-#[ignore]
+
 fn test_decode_all_the_letters() {
     assert_eq!(
         "thequickbrownfoxjumpsoverthelazydog",
