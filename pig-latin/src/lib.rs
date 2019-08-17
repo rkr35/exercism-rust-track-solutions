@@ -5,7 +5,7 @@ pub fn translate(input: &str) -> String {
             use regex::Regex;
             use std::borrow::Cow::Owned;
 
-            const RULES_2_3_4: &str = r"^(y)?([^\saeiouqy]*)(qu)?(q)?(\w+)$";
+            const RULES_2_3_4: &str = r"^(y)?([^aeiouqy]*)(qu)?(q)?(\w+)$";
             fn r(pattern: &str) -> Regex { Regex::new(pattern).unwrap() }
 
             if r(r"^(?:[aeiou]|xr|yt)\w*$").is_match(&word) {
