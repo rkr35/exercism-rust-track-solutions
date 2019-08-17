@@ -1,3 +1,4 @@
+#![warn(clippy::pedantic)]
 pub fn translate(input: &str) -> String {
     use regex::Regex;
     
