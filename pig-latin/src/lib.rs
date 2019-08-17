@@ -1,10 +1,10 @@
 pub fn translate(input: &str) -> String {
     input
-        .split_ascii_whitespace()
+        .split(' ')
         .map(|word| {
             use regex::Regex;
             use std::borrow::Cow::Owned;
-            // todo: Use lazy_static! to cache constructed regular expressions.
+            // todo: Use lazy_static! to cache regular expressions.
             const RULES_2_3_4: &str = r"^(y)?([^\saeiouqy]*)(qu)?(q)?(\w+)$";
             fn r(pattern: &str) -> Regex { Regex::new(pattern).unwrap() }
 
