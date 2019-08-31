@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 fn encode_using_group_size(plain: &str, group_size: Option<usize>) -> String {
     let group_size = group_size.unwrap_or(std::usize::MAX);
 
