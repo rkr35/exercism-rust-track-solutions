@@ -3,13 +3,10 @@
 pub fn encrypt(input: &str) -> String {
     let normalized_letters: Vec<_> = input
         .chars()
-        .filter_map(|c| {
-            if c.is_ascii_alphanumeric() {
-                Some(c.to_ascii_lowercase())
-            } else {
-                None
-            }
-        })
+        .filter_map(|c| 
+            if c.is_ascii_alphanumeric() { Some(c.to_ascii_lowercase()) }
+            else                         { None }
+        )
         .collect();
 
     let columns = (normalized_letters.len() as f64).sqrt().ceil() as usize;
