@@ -1,6 +1,8 @@
 #![warn(clippy::pedantic)]
 
 pub fn encrypt(input: &str) -> String {
+    use std::iter::once;
+
     let normalized_letters: Vec<_> = input
         .chars()
         .filter_map(|c| 
@@ -11,13 +13,15 @@ pub fn encrypt(input: &str) -> String {
 
     let columns = (normalized_letters.len() as f64).sqrt().ceil() as usize;
 
-    (0..columns)
-        .map(|c|
+    let mut encrypted: String = (0..columns)
+        .flat_map(|column|
             normalized_letters
                 .chunks(columns)
-                .map(|row| row.get(c).copied().unwrap_or(' '))
-                .collect::<String>()
+                .map(move |row| row.get(column).copied().unwrap_or(' '))
+                .chain(once(' '))
         )
-        .collect::<Vec<_>>()
-        .join(" ")
+        .collect();
+
+    encrypted.pop();
+    encrypted
 }
