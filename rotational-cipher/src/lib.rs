@@ -1,3 +1,4 @@
+#![warn(clippy::pedantic)]
 pub fn rotate(input: &str, key: i8) -> String {
     input
         .chars()
