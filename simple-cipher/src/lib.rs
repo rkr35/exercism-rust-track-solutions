@@ -1,24 +1,30 @@
 #![warn(clippy::pedantic)]
 
-pub fn encode(key: &str, s: &str) -> Option<String> {
+const A: u8 = b'a';
+
+pub fn code<F>(key: &str, s: &str, mut coder: F) -> Option<String> 
+where F: FnMut(u8, u8) -> u8 {
     if key.is_empty() {
-        None
-    } else {
-        const A: u8 = b'a';
-        let l = |c: u8| c.is_ascii_lowercase();
-        let cipher = |c, k| char::from(A + (c + k - 2 * A) % 26);
-        
-        s
-            .bytes()
-            .zip(key.bytes().cycle())
-            .map(|(c, k)| if l(c) && l(k) { Some(cipher(c, k)) } 
-                          else            { None } )
-            .collect()
+        return None;
     }
+    
+    s
+        .bytes()
+        .zip(key.bytes().cycle())
+        .map(|(c, k)| if c.is_ascii_lowercase() && k.is_ascii_lowercase() {
+            Some((A + coder(c, k) % 26) as char)
+        } else {
+            None
+        })
+        .collect()
+}
+
+pub fn encode(key: &str, s: &str) -> Option<String> {
+    code(key, s, |c, k| c + k - 2 * A)
 }
 
 pub fn decode(key: &str, s: &str) -> Option<String> {
-    unimplemented!("Use {} to decode {} using shift cipher", key, s)
+    code(key, s, |c, k| c + 26 - k)
 }
 
 pub fn encode_random(s: &str) -> (String, String) {
