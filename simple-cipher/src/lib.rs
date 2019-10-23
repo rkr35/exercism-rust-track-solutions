@@ -2,31 +2,19 @@
 
 pub fn encode(key: &str, s: &str) -> Option<String> {
     if key.is_empty() {
-        return None;
-    }
-    
-    let mut encoded = String::with_capacity(s.len());
-
-    let s = s
-        .bytes()
-        .zip(key.bytes().cycle());
-
-    for (s, k) in s {
+        None
+    } else {
         const A: u8 = b'a';
-
-        if !s.is_ascii_lowercase() || !k.is_ascii_lowercase() {
-            return None;
-        }
-
-        let s = s - A; 
-        let k = k - A; 
-        let s = (s + k) % 26;
-        let s = s + A;
-
-        encoded.push(s.into());
+        let l = |c: u8| c.is_ascii_lowercase();
+        let cipher = |c, k| char::from(A + (c + k - 2 * A) % 26);
+        
+        s
+            .bytes()
+            .zip(key.bytes().cycle())
+            .map(|(c, k)| if l(c) && l(k) { Some(cipher(c, k)) } 
+                          else            { None } )
+            .collect()
     }
-
-    Some(encoded)
 }
 
 pub fn decode(key: &str, s: &str) -> Option<String> {
