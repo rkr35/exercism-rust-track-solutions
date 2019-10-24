@@ -28,8 +28,16 @@ pub fn decode(key: &str, s: &str) -> Option<String> {
 }
 
 pub fn encode_random(s: &str) -> (String, String) {
-    unimplemented!(
-        "Generate random key with only a-z chars and encode {}. Return tuple (key, encoded s)",
-        s
-    )
+    use rand::{distributions::Uniform, Rng};
+
+    let key: String = rand::thread_rng()
+        .sample_iter(Uniform::new_inclusive(b'a', b'z'))
+        .take(100)
+        .map(char::from)
+        .collect();
+
+    let encoded = encode(&key, s)
+        .expect("encode_random() generated a key that contains a character outside of a-z.");
+
+    (key, encoded)
 }
