@@ -3,21 +3,17 @@
 const A: u8 = b'a';
 
 pub fn code<F>(key: &str, s: &str, mut coder: F) -> Option<String>
-where
-    F: FnMut(u8, u8) -> u8,
-{
+where F: FnMut(u8, u8) -> u8 {
     if key.is_empty() {
         return None;
     }
 
     s.bytes()
         .zip(key.bytes().cycle())
-        .map(|(c, k)| {
-            if c.is_ascii_lowercase() && k.is_ascii_lowercase() {
-                Some((A + coder(c, k) % 26) as char)
-            } else {
-                None
-            }
+        .map(|(c, k)| if c.is_ascii_lowercase() && k.is_ascii_lowercase() {
+            Some((A + coder(c, k) % 26) as char)
+        } else {
+            None
         })
         .collect()
 }
