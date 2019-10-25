@@ -24,7 +24,6 @@ impl RailFence {
 
     pub fn encode(&self, text: &str) -> String {
         let n = text.len();
-
         let mut encoded = vec![None; n * self.num_rails];
         
         self.rails_iter(n)
@@ -45,7 +44,6 @@ impl RailFence {
             Occupied(char),
         }
 
-        let cipher: Vec<_> = cipher.chars().collect();
         let n = cipher.len();
         let mut decoded = vec![Position::Padding; n * self.num_rails];
 
@@ -55,7 +53,7 @@ impl RailFence {
         decoded
             .iter_mut()
             .filter(|p| **p == Position::Placeholder)
-            .zip(cipher.into_iter())
+            .zip(cipher.chars())
             .for_each(|(p, ch)| *p = Position::Occupied(ch));
 
         self.rails_iter(n)
