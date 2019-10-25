@@ -19,6 +19,7 @@ impl RailFence {
             .cycle()
             .zip(0..)
             .map(move |(y, x)| y * length + x)
+            .take(length)
     }
 
     pub fn encode(&self, text: &str) -> String {
@@ -37,6 +38,28 @@ impl RailFence {
     }
 
     pub fn decode(&self, cipher: &str) -> String {
-        unimplemented!("Decode this ciphertext: {}", cipher)
+        #[derive(PartialEq, Eq, Clone, Copy)]
+        enum Position {
+            Padding,
+            Placeholder,
+            Occupied(char),
+        }
+
+        let cipher: Vec<_> = cipher.chars().collect();
+        let n = cipher.len();
+        let mut decoded = vec![Position::Padding; n * self.num_rails];
+
+        self.rails_iter(n)
+            .for_each(|i| decoded[i] = Position::Placeholder);
+
+        decoded
+            .iter_mut()
+            .filter(|p| **p == Position::Placeholder)
+            .zip(cipher.into_iter())
+            .for_each(|(p, ch)| *p = Position::Occupied(ch));
+
+        self.rails_iter(n)
+            .filter_map(|rail| if let Position::Occupied(c) = decoded[rail] { Some(c) } else { None })
+            .collect()
     }
 }

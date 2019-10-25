@@ -51,21 +51,18 @@ fn test_encode_with_ending_in_the_middle() {
 // decode
 
 #[test]
-#[ignore]
 /// decode with three rails
 fn test_decode_with_three_rails() {
     process_decode_case("TEITELHDVLSNHDTISEIIEA", 3, "THEDEVILISINTHEDETAILS");
 }
 
 #[test]
-#[ignore]
 /// decode with five rails
 fn test_decode_with_five_rails() {
     process_decode_case("EIEXMSMESAORIWSCE", 5, "EXERCISMISAWESOME");
 }
 
 #[test]
-#[ignore]
 /// decode with six rails
 fn test_decode_with_six_rails() {
     process_decode_case(
