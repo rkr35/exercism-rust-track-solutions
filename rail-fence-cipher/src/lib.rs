@@ -17,9 +17,8 @@ impl RailFence {
         (0..r)
             .chain((1..r-1).rev())
             .cycle()
-            .zip(0..)
+            .zip(0..length)
             .map(move |(y, x)| y * length + x)
-            .take(length)
     }
 
     pub fn encode(&self, text: &str) -> String {
