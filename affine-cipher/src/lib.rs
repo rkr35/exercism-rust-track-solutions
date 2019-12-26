@@ -18,20 +18,18 @@ pub fn encode(plaintext: &str, a: i32, b: i32) -> Result<String, AffineCipherErr
         return Err(AffineCipherError::NotCoprime(a));
     }
 
-    // E(x) = ax + b mod M
-    // E(x) - b = ax mod M
-    // a^-1 * (E(x) - b) = x mod M
-    // an = 1 mod M
     Ok(plaintext
         .bytes()
         .filter_map(|c| match c {
             c if c.is_ascii_digit() => Some(c),
             c if c.is_ascii_alphabetic() => {
                 let x = i32::from(c.to_ascii_lowercase() - b'a');
-                let e = (a*x + b) % ALPHABET_SIZE;
-                let e: u8 = e.try_into().expect("Encountered a non-ASCII alphabetic character");
+                let e = (a * x + b) % ALPHABET_SIZE;
+                let e: u8 = e
+                    .try_into()
+                    .expect("Encountered a non-ASCII alphabetic character");
                 Some(b'a' + e)
-            },
+            }
             _ => None,
         })
         .collect::<Encoded>()
@@ -54,9 +52,11 @@ pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherEr
             c if c.is_ascii_alphabetic() => {
                 let y = i32::from(c.to_ascii_lowercase() - b'a');
                 let d = (mod_mult_inv(a, ALPHABET_SIZE) * (y - b)).rem_euclid(ALPHABET_SIZE);
-                let d: u8 = d.try_into().expect("Encountered a non-ASCII alphabetic character");
+                let d: u8 = d
+                    .try_into()
+                    .expect("Encountered a non-ASCII alphabetic character");
                 Some(b'a' + d)
-            },
+            }
             _ => None,
         })
         .map(char::from)
@@ -69,10 +69,7 @@ struct ExtendedGcd {
 }
 
 fn extended_gcd(a: i32, b: i32) -> ExtendedGcd {
-    let mut k = [
-        [a, b],
-        [1, 0],
-    ];
+    let mut k = [[a, b], [1, 0]];
 
     while k[0][1] != 0 {
         let q = k[0][0] / k[0][1];
@@ -83,7 +80,7 @@ fn extended_gcd(a: i32, b: i32) -> ExtendedGcd {
     }
 
     let [[gcd, _], [x, _]] = k;
-    ExtendedGcd { gcd, x, }
+    ExtendedGcd { gcd, x }
 }
 
 fn is_coprime(a: i32, b: i32) -> bool {
@@ -121,7 +118,7 @@ impl Encoded {
 }
 
 impl FromIterator<u8> for Encoded {
-    fn from_iter<I: IntoIterator<Item=u8>>(iter: I) -> Self {
+    fn from_iter<I: IntoIterator<Item = u8>>(iter: I) -> Self {
         let mut encoded = Self::default();
 
         for c in iter {
