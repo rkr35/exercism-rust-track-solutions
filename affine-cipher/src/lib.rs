@@ -18,6 +18,10 @@ pub fn encode(plaintext: &str, a: i32, b: i32) -> Result<String, AffineCipherErr
         return Err(AffineCipherError::NotCoprime(a));
     }
 
+    // E(x) = ax + b mod M
+    // E(x) - b = ax mod M
+    // a^-1 * (E(x) - b) = x mod M
+    // an = 1 mod M
     Ok(plaintext
         .bytes()
         .filter_map(|c| match c {
@@ -37,21 +41,57 @@ pub fn encode(plaintext: &str, a: i32, b: i32) -> Result<String, AffineCipherErr
 /// Decodes the ciphertext using the affine cipher with key (`a`, `b`). Note that, rather than
 /// returning a return code, the more common convention in Rust is to return a `Result`.
 pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherError> {
-    unimplemented!("Decode {} with the key ({}, {})", ciphertext, a, b);
-}
+    use core::convert::TryInto;
 
-fn gcd(mut a: i32, mut b: i32) -> i32 {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
+    if !is_coprime(a, ALPHABET_SIZE) {
+        return Err(AffineCipherError::NotCoprime(a));
     }
 
-    a
+    Ok(ciphertext
+        .bytes()
+        .filter_map(|c| match c {
+            c if c.is_ascii_digit() => Some(c),
+            c if c.is_ascii_alphabetic() => {
+                let y = i32::from(c.to_ascii_lowercase() - b'a');
+                let d = (mod_mult_inv(a, ALPHABET_SIZE) * (y - b)).rem_euclid(ALPHABET_SIZE);
+                let d: u8 = d.try_into().expect("Encountered a non-ASCII alphabetic character");
+                Some(b'a' + d)
+            },
+            _ => None,
+        })
+        .map(char::from)
+        .collect::<String>())
+}
+
+struct ExtendedGcd {
+    gcd: i32,
+    x: i32,
+}
+
+fn extended_gcd(a: i32, b: i32) -> ExtendedGcd {
+    let mut k = [
+        [a, b],
+        [1, 0],
+    ];
+
+    while k[0][1] != 0 {
+        let q = k[0][0] / k[0][1];
+
+        for [old, current] in k.iter_mut() {
+            *old = core::mem::replace(current, *old - *current * q);
+        }
+    }
+
+    let [[gcd, _], [x, _]] = k;
+    ExtendedGcd { gcd, x, }
 }
 
 fn is_coprime(a: i32, b: i32) -> bool {
-    gcd(a, b) == 1
+    extended_gcd(a, b).gcd == 1
+}
+
+fn mod_mult_inv(a: i32, m: i32) -> i32 {
+    extended_gcd(a, m).x
 }
 
 #[derive(Default)]
