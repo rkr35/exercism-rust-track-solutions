@@ -60,7 +60,7 @@ pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherEr
             _ => None,
         })
         .map(char::from)
-        .collect::<String>())
+        .collect())
 }
 
 struct ExtendedGcd {
