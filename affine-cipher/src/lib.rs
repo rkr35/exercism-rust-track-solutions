@@ -41,7 +41,10 @@ pub fn encode(plaintext: &str, a: i32, b: i32) -> Result<String, AffineCipherErr
 pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherError> {
     use core::convert::TryInto;
 
-    if !is_coprime(a, ALPHABET_SIZE) {
+    let ExtendedGcd { gcd, x } = extended_gcd(a, ALPHABET_SIZE);
+    let is_coprime = gcd == 1;
+
+    if !is_coprime {
         return Err(AffineCipherError::NotCoprime(a));
     }
 
@@ -51,7 +54,7 @@ pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherEr
             c if c.is_ascii_digit() => Some(c),
             c if c.is_ascii_alphabetic() => {
                 let y = i32::from(c.to_ascii_lowercase() - b'a');
-                let d = (mod_mult_inv(a, ALPHABET_SIZE) * (y - b)).rem_euclid(ALPHABET_SIZE);
+                let d = (x * (y - b)).rem_euclid(ALPHABET_SIZE);
                 let d: u8 = d
                     .try_into()
                     .expect("Encountered a non-ASCII alphabetic character");
@@ -85,10 +88,6 @@ fn extended_gcd(a: i32, b: i32) -> ExtendedGcd {
 
 fn is_coprime(a: i32, b: i32) -> bool {
     extended_gcd(a, b).gcd == 1
-}
-
-fn mod_mult_inv(a: i32, m: i32) -> i32 {
-    extended_gcd(a, m).x
 }
 
 #[derive(Default)]
