@@ -1,5 +1,4 @@
 use core::iter::{FromIterator, IntoIterator};
-
 /// While the problem description indicates a return status of 1 should be returned on errors,
 /// it is much more common to return a `Result`, so we provide an error type for the result here.
 #[derive(Debug, Eq, PartialEq)]
@@ -32,7 +31,7 @@ pub fn encode(plaintext: &str, a: i32, b: i32) -> Result<String, AffineCipherErr
             }
             _ => None,
         })
-        .collect::<Encoded>()
+        .collect::<Encoded<AddSpace>>()
         .into())
 }
 
@@ -41,7 +40,9 @@ pub fn encode(plaintext: &str, a: i32, b: i32) -> Result<String, AffineCipherErr
 pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherError> {
     use core::convert::TryInto;
 
-    if !is_coprime(a, ALPHABET_SIZE) {
+    let ExtendedGcd { gcd, x } = extended_gcd(a, ALPHABET_SIZE);
+    
+    if gcd != 1 {
         return Err(AffineCipherError::NotCoprime(a));
     }
 
@@ -51,7 +52,7 @@ pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherEr
             c if c.is_ascii_digit() => Some(c),
             c if c.is_ascii_alphabetic() => {
                 let y = i32::from(c.to_ascii_lowercase() - b'a');
-                let d = (mod_mult_inv(a, ALPHABET_SIZE) * (y - b)).rem_euclid(ALPHABET_SIZE);
+                let d = (x * (y - b)).rem_euclid(ALPHABET_SIZE);
                 let d: u8 = d
                     .try_into()
                     .expect("Encountered a non-ASCII alphabetic character");
@@ -59,8 +60,8 @@ pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherEr
             }
             _ => None,
         })
-        .map(char::from)
-        .collect())
+        .collect::<Encoded<NoSpace>>()
+        .into())
 }
 
 struct ExtendedGcd {
@@ -87,17 +88,14 @@ fn is_coprime(a: i32, b: i32) -> bool {
     extended_gcd(a, b).gcd == 1
 }
 
-fn mod_mult_inv(a: i32, m: i32) -> i32 {
-    extended_gcd(a, m).x
-}
-
 #[derive(Default)]
-struct Encoded {
+struct Encoded<Spacing> {
     encoded: String,
     num_added: usize,
+    _spacing: Spacing,
 }
 
-impl Encoded {
+impl Encoded<AddSpace> {
     const GROUP_SIZE: usize = 5;
 
     fn push(&mut self, c: u8) {
@@ -117,20 +115,37 @@ impl Encoded {
     }
 }
 
-impl FromIterator<u8> for Encoded {
-    fn from_iter<I: IntoIterator<Item = u8>>(iter: I) -> Self {
-        let mut encoded = Self::default();
-
-        for c in iter {
-            encoded.push(c);
-        }
-
-        encoded
+impl Encoded<NoSpace> {
+    fn push(&mut self, c: u8) {
+        self.encoded.push(c.into());
     }
 }
 
-impl Into<String> for Encoded {
+impl<Spacing> Into<String> for Encoded<Spacing> {
     fn into(self) -> String {
         self.encoded
     }
 }
+
+macro_rules! impl_zsts {
+    ($($zst:ident),+) => {
+        $(
+            #[derive(Default)]
+            struct $zst;
+
+            impl FromIterator<u8> for Encoded<$zst> {
+                fn from_iter<I: IntoIterator<Item = u8>>(iter: I) -> Self {
+                    let mut encoded = Self::default();
+            
+                    for c in iter {
+                        encoded.push(c);
+                    }
+            
+                    encoded
+                }
+            }
+        )+
+    }
+}
+
+impl_zsts!(AddSpace, NoSpace);
