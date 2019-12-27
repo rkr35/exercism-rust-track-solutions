@@ -1,29 +1,35 @@
-use std::marker::PhantomData;
+use std::collections::HashMap;
 
 pub struct CodonsInfo<'a> {
-    // This field is here to make the template compile and not to
-    // complain about unused type lifetime parameter "'a". Once you start
-    // solving the exercise, delete this field and the 'std::marker::PhantomData'
-    // import.
-    phantom: PhantomData<&'a ()>,
+    codon_to_protein: HashMap<&'a [u8], &'a str>,
 }
 
 impl<'a> CodonsInfo<'a> {
+    fn name_for_bytes(&self, codon: &[u8]) -> Option<&'a str> {
+        self.codon_to_protein.get(codon).copied()
+    }
+    
     pub fn name_for(&self, codon: &str) -> Option<&'a str> {
-        unimplemented!(
-            "Return the protein name for a '{}' codon or None, if codon string is invalid",
-            codon
-        );
+        self.name_for_bytes(codon.as_bytes())
     }
 
     pub fn of_rna(&self, rna: &str) -> Option<Vec<&'a str>> {
-        unimplemented!("Return a list of protein names that correspond to the '{}' RNA string or None if the RNA string is invalid", rna);
+        rna
+            .as_bytes()
+            .chunks(3)
+            .map(|codon| self.name_for_bytes(codon))
+            .take_while(|name| name.unwrap_or("") != "stop codon")
+            .collect()
     }
 }
 
 pub fn parse<'a>(pairs: Vec<(&'a str, &'a str)>) -> CodonsInfo<'a> {
-    unimplemented!(
-        "Construct a new CodonsInfo struct from given pairs: {:?}",
-        pairs
-    );
+    use core::iter::FromIterator;
+
+    CodonsInfo {
+        codon_to_protein: HashMap::from_iter(pairs
+            .into_iter()
+            .map(|(codon, name)| (codon.as_bytes(), name))
+        ),
+    }
 }
