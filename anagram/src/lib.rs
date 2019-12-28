@@ -14,7 +14,8 @@ pub fn anagrams_for<'a>(word: &str, possible_anagrams: &[&'a str]) -> HashSet<&'
     
     possible_anagrams
         .iter()
-        .filter(|possible| poor_hash(possible) == word_poor_hash && chars(word).ne(chars(possible)))
+        .filter(|possible| poor_hash(possible) == word_poor_hash
+                           && chars(word).ne(chars(possible)))
         .copied()
         .collect()
 }
