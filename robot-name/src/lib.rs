@@ -38,7 +38,7 @@ impl Robot {
 }
 
 
-struct Generator<> {
+struct Generator {
     rng: StdRng,
     letter: Uniform<u8>,
     number: Uniform<u8>,
