@@ -33,7 +33,7 @@ impl Robot {
             .lock()
             .expect("Encountered a poisoned lock");
 
-        self.name = lock.generate();
+        self.name = lock.generate(&self.name);
     }
 }
 
@@ -55,22 +55,27 @@ impl Generator {
         }
     }
 
-    fn generate(&mut self) -> ArcString {
+    fn get_random_name(&mut self) -> String {
+        const LENGTH: usize = 5;
+        let mut name = String::with_capacity(LENGTH);
+    
+        for _ in 0..2 {
+            name.push(self.letter.sample(&mut self.rng).into());
+        }
+    
+        for _ in 2..LENGTH {
+            name.push(self.number.sample(&mut self.rng).into());
+        }
+
+        name
+    }
+
+    fn generate(&mut self, old_name: &ArcString) -> ArcString {
         loop {
-            const LENGTH: usize = 5;
-            let mut name = String::with_capacity(LENGTH);
-
-            for _ in 0..2 {
-                name.push(self.letter.sample(&mut self.rng).into());
-            }
-
-            for _ in 2..LENGTH {
-                name.push(self.number.sample(&mut self.rng).into());
-            }
-
-            let name = ArcString::new(name);
+            let name = ArcString::new(self.get_random_name());
             
             if self.names_in_use.insert(ArcString::clone(&name)) {
+                self.names_in_use.remove(old_name);
                 return name;
             }
             
