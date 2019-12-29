@@ -37,7 +37,6 @@ impl Robot {
     }
 }
 
-
 struct Generator {
     rng: StdRng,
     letter: Uniform<u8>,
@@ -56,17 +55,13 @@ impl Generator {
     }
 
     fn get_random_name(&mut self) -> String {
-        const LENGTH: usize = 5;
-        let mut name = String::with_capacity(LENGTH);
-    
-        for _ in 0..2 {
-            name.push(self.letter.sample(&mut self.rng).into());
-        }
-    
-        for _ in 2..LENGTH {
-            name.push(self.number.sample(&mut self.rng).into());
-        }
-
+        const PREFIX_LEN: usize = 2;
+        const SUFFIX_LEN: usize = 3;
+        let letter = &self.letter;
+        let number = &self.number;
+        let mut name = String::with_capacity(PREFIX_LEN + SUFFIX_LEN);
+        name.extend(letter.sample_iter(&mut self.rng).take(PREFIX_LEN).map(char::from));
+        name.extend(number.sample_iter(&mut self.rng).take(SUFFIX_LEN).map(char::from));
         name
     }
 
