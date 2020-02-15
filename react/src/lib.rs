@@ -75,17 +75,26 @@ impl<T: Copy + PartialEq> Reactor<T> {
         dependencies: &[CellID],
         compute_func: fn(&[T]) -> T,
     ) -> Result<ComputeCellID, CellID> {
-        if let Some(not_found_dep) = dependencies.iter().find(|d| self.value(**d).is_none()) {
-            return Err(*not_found_dep);
-        }
-
+        let dependencies: Result<Vec<CellID>, CellID> = dependencies
+            .iter()
+            .map(|&d| if self.has(d) { Ok(d) } else { Err(d) })
+            .collect();
+        
         self.computes.push(Compute {
-            dependencies: dependencies.to_vec(),
+            dependencies: dependencies?,
             compute_func,
         });
 
         Ok(ComputeCellID(self.computes.len() - 1))
     }
+
+    fn has(&self, id: CellID) -> bool {
+        match id {
+            CellID::Input(InputCellID(i)) => i < self.inputs.len(),
+            CellID::Compute(ComputeCellID(i)) => i < self.computes.len(),
+        }
+    }
+
     // Retrieves the current value of the cell, or None if the cell does not exist.
     //
     // You may wonder whether it is possible to implement `get(&self, id: CellID) -> Option<&Cell>`
