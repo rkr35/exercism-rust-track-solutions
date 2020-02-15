@@ -18,7 +18,7 @@ pub struct InputCellID(usize);
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ComputeCellID(usize);
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct CallbackID();
+pub struct CallbackID(usize);
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CellID {
@@ -33,23 +33,24 @@ pub enum RemoveCallbackError {
 }
 
 struct Input<T> {
-    parents: Vec<CellID>,
+    parents: Vec<ComputeCellID>,
     value: T,
 }
 
-struct Compute<T> {
-    parents: Vec<CellID>,
+struct Compute<'a, T> {
+    parents: Vec<ComputeCellID>,
     dependencies: Vec<CellID>,
+    callbacks: Vec<Box<dyn FnMut(T) + 'a>>,
     compute_func: fn(&[T]) -> T,
 }
 
-pub struct Reactor<T> {
+pub struct Reactor<'a, T> {
     inputs: Vec<Input<T>>,
-    computes: Vec<Compute<T>>,
+    computes: Vec<Compute<'a, T>>,
 }
 
 // You are guaranteed that Reactor will only be tested against types that are Copy + PartialEq.
-impl<T: Copy + PartialEq> Reactor<T> {
+impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
     pub fn new() -> Self {
         Self {
             inputs: vec![],
@@ -97,11 +98,11 @@ impl<T: Copy + PartialEq> Reactor<T> {
         for dep in &dependencies {
             match dep {
                 CellID::Input(InputCellID(i)) => if let Some(cell) = self.inputs.get_mut(*i) {
-                    cell.parents.push(CellID::Compute(next_id));
+                    cell.parents.push(next_id);
                 }
 
                 CellID::Compute(ComputeCellID(i)) => if let Some(cell) = self.computes.get_mut(*i) {
-                    cell.parents.push(CellID::Compute(next_id));
+                    cell.parents.push(next_id);
                 }
             }
         }
@@ -109,6 +110,7 @@ impl<T: Copy + PartialEq> Reactor<T> {
         self.computes.push(Compute {
             parents: vec![],
             dependencies,
+            callbacks: vec![],
             compute_func,
         });
 
@@ -156,7 +158,16 @@ impl<T: Copy + PartialEq> Reactor<T> {
     // As before, that turned out to add too much extra complexity.
     pub fn set_value(&mut self, id: InputCellID, new_value: T) -> bool {
         if let Some(cell) = self.inputs.get_mut(id.0) {
+            let old_value = cell.value;
             cell.value = new_value;
+
+            if old_value != new_value {
+                // // Tell my parents that I've been updated.
+                // for parent in cell.parents {
+                //     parent.
+                // }
+            }
+
             true
         } else {
             false
@@ -175,12 +186,14 @@ impl<T: Copy + PartialEq> Reactor<T> {
     // * Exactly once if the compute cell's value changed as a result of the set_value call.
     //   The value passed to the callback should be the final value of the compute cell after the
     //   set_value call.
-    pub fn add_callback<F: FnMut(T) -> ()>(
+    pub fn add_callback<F: FnMut(T) + 'a>(
         &mut self,
-        _id: ComputeCellID,
-        _callback: F,
+        id: ComputeCellID,
+        callback: F,
     ) -> Option<CallbackID> {
-        unimplemented!()
+        let cell = self.computes.get_mut(id.0)?;
+        cell.callbacks.push(Box::new(callback));
+        Some(CallbackID(cell.callbacks.len() - 1))
     }
 
     // Removes the specified callback, using an ID returned from add_callback.
