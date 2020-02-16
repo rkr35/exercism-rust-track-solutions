@@ -26,45 +26,80 @@ pub enum CellID {
     Compute(ComputeCellID),
 }
 
+impl From<CellID> for usize {
+    fn from(id: CellID) -> Self {
+        match id {
+            CellID::Input(InputCellID(i)) => i,
+            CellID::Compute(ComputeCellID(i)) => i,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum RemoveCallbackError {
     NonexistentCell,
     NonexistentCallback,
 }
 
-struct Input<T> {
-    parents: Vec<ComputeCellID>,
-    value: T,
+enum Cell<'a, T> {
+    Input {
+        parents: Vec<ComputeCellID>,
+        value: T,
+    },
+
+    Compute {
+        parents: Vec<ComputeCellID>,
+        dependencies: Vec<CellID>,
+        callbacks: Vec<Box<dyn FnMut(T) + 'a>>,
+        compute_func: fn(&[T]) -> T,
+    }
 }
 
-struct Compute<'a, T> {
-    parents: Vec<ComputeCellID>,
-    dependencies: Vec<CellID>,
-    callbacks: Vec<Box<dyn FnMut(T) + 'a>>,
-    compute_func: fn(&[T]) -> T,
+impl<'a, T> Cell<'a, T> where T: Copy + PartialEq {
+    fn value(&self, cells: &[Cell<T>]) -> Option<T> {
+        match self {
+            Self::Input { value, .. } => Some(*value),
+            
+            Self::Compute { dependencies, compute_func, ..} => {
+                let dependencies: Option<Vec<T>> = dependencies
+                    .iter()
+                    .map(|id| cells
+                        .get(usize::from(*id))
+                        .and_then(|c| c.value(cells)))
+                    .collect();
+                
+                Some((compute_func)(&dependencies?))
+            }
+        }
+    }
+
+    fn add_parent(&mut self, parent_id: ComputeCellID) {
+        match self {
+            Self::Input { parents, .. } => parents.push(parent_id),
+            Self::Compute { parents, .. } => parents.push(parent_id),
+        }
+    }
 }
 
 pub struct Reactor<'a, T> {
-    inputs: Vec<Input<T>>,
-    computes: Vec<Compute<'a, T>>,
+    cells: Vec<Cell<'a, T>>,
 }
 
 // You are guaranteed that Reactor will only be tested against types that are Copy + PartialEq.
 impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
     pub fn new() -> Self {
         Self {
-            inputs: vec![],
-            computes: vec![],
+            cells: Default::default(),
         }
     }
 
     // Creates an input cell with the specified initial value, returning its ID.
     pub fn create_input(&mut self, initial: T) -> InputCellID {
-        self.inputs.push(Input {
+        self.cells.push(Cell::Input {
             parents: vec![],
             value: initial,
         });
-        InputCellID(self.inputs.len() - 1)
+        InputCellID(self.cells.len() - 1)
     }
 
     // Creates a compute cell with the specified dependencies and compute function.
@@ -86,28 +121,24 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
         compute_func: fn(&[T]) -> T,
     ) -> Result<ComputeCellID, CellID> {
 
-        let next_id = ComputeCellID(self.computes.len());
+        let next_id = ComputeCellID(self.cells.len());
 
         let dependencies: Result<Vec<CellID>, CellID> = dependencies
             .iter()
             .map(|&d| if self.has(d) { Ok(d) } else { Err(d) })
             .collect();
         
+        // Early-exit with Err(CellID) for CellID that does not exist in self.
         let dependencies = dependencies?;
 
         for dep in &dependencies {
-            match dep {
-                CellID::Input(InputCellID(i)) => if let Some(cell) = self.inputs.get_mut(*i) {
-                    cell.parents.push(next_id);
-                }
-
-                CellID::Compute(ComputeCellID(i)) => if let Some(cell) = self.computes.get_mut(*i) {
-                    cell.parents.push(next_id);
-                }
-            }
+            self
+                .get_mut(*dep)
+                .unwrap()
+                .add_parent(next_id);
         }
 
-        self.computes.push(Compute {
+        self.cells.push(Cell::Compute {
             parents: vec![],
             dependencies,
             callbacks: vec![],
@@ -117,11 +148,16 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
         Ok(next_id)
     }
 
+    fn get(&self, id: CellID) -> Option<&Cell<T>> {
+        self.cells.get(usize::from(id))
+    }
+
+    fn get_mut(&mut self, id: CellID) -> Option<&mut Cell<'a, T>> {
+        self.cells.get_mut(usize::from(id))
+    }
+
     fn has(&self, id: CellID) -> bool {
-        match id {
-            CellID::Input(InputCellID(i)) => i < self.inputs.len(),
-            CellID::Compute(ComputeCellID(i)) => i < self.computes.len(),
-        }
+        usize::from(id) < self.cells.len()
     }
 
     // Retrieves the current value of the cell, or None if the cell does not exist.
@@ -132,20 +168,9 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
     // It turns out this introduces a significant amount of extra complexity to this exercise.
     // We chose not to cover this here, since this exercise is probably enough work as-is.
     pub fn value(&self, id: CellID) -> Option<T> {
-        match id {
-            CellID::Input(InputCellID(i)) => self.inputs.get(i).map(|c| c.value),
-            CellID::Compute(ComputeCellID(i)) => {
-                let cell = self.computes.get(i)?;
-                
-                let dependencies: Option<Vec<T>> = cell
-                    .dependencies
-                    .iter()
-                    .map(|id| self.value(*id))
-                    .collect();
-                
-                dependencies.map(|deps| (cell.compute_func)(&deps))
-            }
-        }
+        self
+            .get(id)?
+            .value(&self.cells)
     }
 
     // Sets the value of the specified input cell.
@@ -157,17 +182,8 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
     //
     // As before, that turned out to add too much extra complexity.
     pub fn set_value(&mut self, id: InputCellID, new_value: T) -> bool {
-        if let Some(cell) = self.inputs.get_mut(id.0) {
-            let old_value = cell.value;
-            cell.value = new_value;
-
-            if old_value != new_value {
-                // // Tell my parents that I've been updated.
-                // for parent in cell.parents {
-                //     parent.
-                // }
-            }
-
+        if let Some(Cell::Input { value, .. }) = self.cells.get_mut(id.0) {    
+            *value = new_value;
             true
         } else {
             false
@@ -191,9 +207,14 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
         id: ComputeCellID,
         callback: F,
     ) -> Option<CallbackID> {
-        let cell = self.computes.get_mut(id.0)?;
-        cell.callbacks.push(Box::new(callback));
-        Some(CallbackID(cell.callbacks.len() - 1))
+        let cell = self.cells.get_mut(id.0)?;
+
+        if let Cell::Compute { callbacks, .. } = cell {
+            callbacks.push(Box::new(callback));
+            Some(CallbackID(callbacks.len() - 1))
+        } else {
+            None
+        }
     }
 
     // Removes the specified callback, using an ID returned from add_callback.
