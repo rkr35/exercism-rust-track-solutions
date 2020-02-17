@@ -130,31 +130,31 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
 
         let dependencies: Result<Vec<CellID>, CellID> = dependencies
             .iter()
-            .map(|&d| if self.has(d) { Ok(d) } else { Err(d) })
+            .map(|&d| if usize::from(d) < self.cells.len() { Ok(d) } else { Err(d) })
             .collect();
         
         // Early-exit with Err(CellID) for CellID that does not exist in self.
         let dependencies = dependencies?;
 
-        for dep in &dependencies {
+        for &dep in &dependencies {
             self
-                .get_mut(*dep)
-                .unwrap()
+                .cells
+                .get_mut(usize::from(dep))
+                .ok_or(dep)?
                 .add_parent(next_id);
         }
 
         let value = {
-            let dependencies: Vec<T> = dependencies
+            let dependencies: Result<Vec<T>, CellID> = dependencies
                 .iter()
-                .map(|id| self
+                .map(|&id| self
                     .cells
-                    .get(usize::from(*id))
-                    .unwrap()
-                    .value(&self.cells)
-                    .unwrap())
+                    .get(usize::from(id))
+                    .and_then(|c| c.value(&self.cells))
+                    .ok_or(id))
                 .collect();
 
-            ((compute_func)(&dependencies))
+            ((compute_func)(&dependencies?))
         };
 
         self.cells.push(Cell::Compute {
@@ -168,18 +168,6 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
         Ok(next_id)
     }
 
-    fn get(&self, id: CellID) -> Option<&Cell<T>> {
-        self.cells.get(usize::from(id))
-    }
-
-    fn get_mut(&mut self, id: CellID) -> Option<&mut Cell<'a, T>> {
-        self.cells.get_mut(usize::from(id))
-    }
-
-    fn has(&self, id: CellID) -> bool {
-        usize::from(id) < self.cells.len()
-    }
-
     // Retrieves the current value of the cell, or None if the cell does not exist.
     //
     // You may wonder whether it is possible to implement `get(&self, id: CellID) -> Option<&Cell>`
@@ -189,7 +177,8 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
     // We chose not to cover this here, since this exercise is probably enough work as-is.
     pub fn value(&self, id: CellID) -> Option<T> {
         self
-            .get(id)?
+            .cells
+            .get(usize::from(id))?
             .value(&self.cells)
     }
 
