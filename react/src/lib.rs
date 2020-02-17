@@ -207,22 +207,21 @@ impl<'a, T: Copy + PartialEq> Reactor<'a, T> {
             let cell = self.cells.get_mut(parent.0)?;
 
             if let Cell::Compute { value, callbacks, parents, .. } = cell {
-                let parents = Rc::clone(parents);
-
                 if new_value != *value {
                     *value = new_value;
-
+                    
                     for callback in callbacks {
                         if let Some(callback) = callback {
                             (callback)(new_value);
                         }
                     }
                 }
-
+                
+                let parents = Rc::clone(parents);
                 self.notify(&parents);
             }
         }
-
+        
         Some(())
     }
 
