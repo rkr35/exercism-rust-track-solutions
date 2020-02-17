@@ -9,7 +9,7 @@ pub fn answer(command: &str) -> Option<i32> {
             // Look for second operand.
 
             if Op::from(token).is_some() {
-                // Found another operation in the middle of an operation.
+                // Found another operation in the middle of this operation.
                 // So the input is malformed.
                 return None;
             }
