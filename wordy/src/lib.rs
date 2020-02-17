@@ -1,3 +1,5 @@
+#![no_std]
+
 pub fn answer(command: &str) -> Option<i32> {
     let mut number = None;
     let mut op: Option<Op> = None;
@@ -67,7 +69,7 @@ impl Op {
 
     fn calc(&self, a: i32, b: i32) -> i32 {
         use Op::*;
-        use std::convert::TryInto;
+        use core::convert::TryInto;
         match self {
             Add => a + b,
             Subtract => a - b,
