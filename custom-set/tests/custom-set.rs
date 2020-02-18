@@ -7,35 +7,30 @@ fn sets_with_no_elements_are_empty() {
 }
 
 #[test]
-#[ignore]
 fn sets_with_elements_are_not_empty() {
     let set = CustomSet::new(&[1]);
     assert!(!set.is_empty());
 }
 
 #[test]
-#[ignore]
 fn nothing_is_contained_in_an_empty_set() {
     let set = CustomSet::new(&[]);
     assert!(!set.contains(&1));
 }
 
 #[test]
-#[ignore]
 fn true_when_the_element_is_in_the_set() {
     let set = CustomSet::new(&[1, 2, 3]);
     assert!(set.contains(&1));
 }
 
 #[test]
-#[ignore]
 fn false_when_the_element_is_not_in_the_set() {
     let set = CustomSet::new(&[1, 2, 3]);
     assert!(!set.contains(&4));
 }
 
 #[test]
-#[ignore]
 fn empty_sets_are_subsets_of_each_other() {
     let set1: CustomSet<()> = CustomSet::new(&[]);
     let set2: CustomSet<()> = CustomSet::new(&[]);
@@ -44,7 +39,6 @@ fn empty_sets_are_subsets_of_each_other() {
 }
 
 #[test]
-#[ignore]
 fn empty_set_is_subset_of_non_empty_set() {
     let set1 = CustomSet::new(&[]);
     let set2 = CustomSet::new(&[1]);
@@ -52,7 +46,6 @@ fn empty_set_is_subset_of_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn non_empty_set_is_not_subset_of_empty_set() {
     let set1 = CustomSet::new(&[1]);
     let set2 = CustomSet::new(&[]);
@@ -60,7 +53,6 @@ fn non_empty_set_is_not_subset_of_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn sets_with_same_elements_are_subsets() {
     let set1 = CustomSet::new(&[1, 2, 3]);
     let set2 = CustomSet::new(&[1, 2, 3]);
@@ -69,7 +61,6 @@ fn sets_with_same_elements_are_subsets() {
 }
 
 #[test]
-#[ignore]
 fn set_contained_in_other_set_is_a_subset() {
     let set1 = CustomSet::new(&[1, 2, 3]);
     let set2 = CustomSet::new(&[4, 1, 2, 3]);
@@ -77,7 +68,6 @@ fn set_contained_in_other_set_is_a_subset() {
 }
 
 #[test]
-#[ignore]
 fn set_not_contained_in_other_set_is_not_a_subset_one() {
     let set1 = CustomSet::new(&[1, 2, 3]);
     let set2 = CustomSet::new(&[4, 1, 3]);
